@@ -1,5 +1,3 @@
-# SAVI_TP2
-
 Trabalho Prático 2 - SAVI
 ==============
 Miguel Riem Oliveira <mriem@ua.pt>
