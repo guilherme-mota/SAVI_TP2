@@ -49,7 +49,7 @@ def main():
     
     # Load PCD
     p = PointCloudProcessing()
-    p.loadpcd('/home/miguel/Documents/SAVI_TP2/docs/rgbd-scenes-v2_pc/rgbd-scenes-v2/pc/05.ply')
+    p.loadpcd('/home/miguel/Documents/SAVI_TP2/docs/rgbd-scenes-v2_pc/rgbd-scenes-v2/pc/14.ply')
     
     # ------------------------------------
     # Execution 
@@ -59,9 +59,13 @@ def main():
     p.downsample()
 
     # Adjustment of coordiante system to the table with objects to recognize
+
+    p.frameadjustment() #Testing...... melhor 2 leituras, no entanto se nessas duas o b for negativo faz mais uma leitura, condição de escolha = b positivo e d max (mais prox de 0 - plano mais alto)         
+
     p.frametransform(-108, 0, 0, 0, 0, 0)
     p.frametransform(0, 0, -37, 0, 0, 0)
     p.frametransform(0, 0, 0, -0.85, -1.10, 0.35)
+    #p.frametransform(0, 0, 0, -1.55, -0.3, 0.35) #file 5
 
     # Isolation of interest part (table + objects)
     p.croppcd(-0.7, -0.7, -0.1, 0.9, 0.7, 0.4)
@@ -83,7 +87,7 @@ def main():
 
     # Draw Table Plane
     p.inliers.paint_uniform_color([0.9,0.9,1])
-    #entities_to_draw = [p.inliers] # Draw only de plane (ouliers are the objects)
+    entities_to_draw.append(p.inliers) # Draw only de plane (ouliers are the objects)
 
     # Create coordinate system
     frame = o3d.geometry.TriangleMesh().create_coordinate_frame(size=0.2, origin=np.array([0, 0, 0]))
@@ -96,11 +100,11 @@ def main():
     # Draw table plane + frame + objects
     entities_to_draw = np.concatenate((entities_to_draw, p.objects_to_draw))
 
-    o3d.visualization.draw_geometries(entities_to_draw,
-                                            zoom = view['trajectory'][0]['zoom'],
-                                            front = view['trajectory'][0]['front'],
-                                            lookat = view['trajectory'][0]['lookat'],
-                                            up = view['trajectory'][0]['up'])
+    # o3d.visualization.draw_geometries(entities_to_draw,
+    #                                         zoom = view['trajectory'][0]['zoom'],
+    #                                         front = view['trajectory'][0]['front'],
+    #                                         lookat = view['trajectory'][0]['lookat'],
+    #                                         up = view['trajectory'][0]['up'])
 
     
 
