@@ -48,6 +48,37 @@ class PointCloudProcessing():
         # Pre Processing with Voxel downsampling
         self.pcd = self.originalpcd.voxel_down_sample(voxel_size=0.01) 
 
+    def frameadjustment(self, distance_threshold=0.05, ransac_n=5, num_iterations=100):
+        detected_plane_idx = []
+        num_planes = 2
+
+        while True:
+            plane_model, inliers = self.pcd.segment_plane(distance_threshold, ransac_n, num_iterations)
+            [a, b, c, d] = plane_model
+
+            if b < 0:
+                num_planes=3
+            
+
+            print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
+
+
+            inlier_cloud = self.pcd.select_by_index(inliers)
+            inlier_cloud.paint_uniform_color([1.0, 0, 0])
+
+            outlier_cloud = self.pcd.select_by_index(inliers, invert=True)
+            
+            o3d.visualization.draw_geometries([inlier_cloud],
+                                            zoom=0.8,
+                                            front=[-0.4999, -0.1659, -0.8499],
+                                            lookat=[2.1813, 2.0619, 2.0999],
+                                            up=[0.1204, -0.9852, 0.1215])
+            self.pcd = outlier_cloud
+            detected_plane_idx.append(inlier_cloud)
+            if len(detected_plane_idx) >= num_planes: 
+                num_planes = 2
+                break
+
     def frametransform(self, r, p , y, tx, ty, tz):
 
         # Rad to Deg
@@ -106,11 +137,11 @@ class PointCloudProcessing():
         objects_idx = list(set(cluster_idx))
 
         # Remove noise 
-        objects_idx.remove(-1) 
+        #objects_idx.remove(-1) 
 
-        # # If exist remove noise (bug solution)
-        # if cluster_idx.any() == -1:
-        #     number_of_clusters.remove(-1)  
+        # If exist remove noise (bug solution)
+        if cluster_idx.any() == -1:
+            objects_idx.remove(-1)  
         
         colormap = cm.Pastel1(list(range(0,len(objects_idx))))
         objects=[]
