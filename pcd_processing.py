@@ -48,36 +48,121 @@ class PointCloudProcessing():
         # Pre Processing with Voxel downsampling
         self.pcd = self.originalpcd.voxel_down_sample(voxel_size=0.01) 
 
-    def frameadjustment(self, distance_threshold=0.05, ransac_n=5, num_iterations=100):
-        detected_plane_idx = []
+    def frameadjustment(self, distance_threshold=0.08, ransac_n=5, num_iterations=100):
+        table_pcd = self.pcd
         num_planes = 2
+        detected_plane_idx = []
+        detected_plane_d = []
+        
+        
 
         while True:
-            plane_model, inliers = self.pcd.segment_plane(distance_threshold, ransac_n, num_iterations)
+            # Plane Segmentation
+            plane_model, inliers = table_pcd.segment_plane(distance_threshold, ransac_n, num_iterations)
+
+            # Plane Model
             [a, b, c, d] = plane_model
-
+            
+            # If there is a plane that have de negative y, will be necessary make one more measurement/segmentation 
             if b < 0:
-                num_planes=3
+                num_planes = 3
             
+            # Print plane equation
+            # print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
 
-            print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
-
-
-            inlier_cloud = self.pcd.select_by_index(inliers)
+            # Inlier Cloud
+            inlier_cloud = table_pcd.select_by_index(inliers)
             inlier_cloud.paint_uniform_color([1.0, 0, 0])
-
-            outlier_cloud = self.pcd.select_by_index(inliers, invert=True)
             
-            o3d.visualization.draw_geometries([inlier_cloud],
-                                            zoom=0.8,
-                                            front=[-0.4999, -0.1659, -0.8499],
-                                            lookat=[2.1813, 2.0619, 2.0999],
-                                            up=[0.1204, -0.9852, 0.1215])
-            self.pcd = outlier_cloud
-            detected_plane_idx.append(inlier_cloud)
+            # Visualization of detected planes
+            # o3d.visualization.draw_geometries([inlier_cloud],
+            #                                 zoom=0.8,
+            #                                 front=[-0.4999, -0.1659, -0.8499],
+            #                                 lookat=[2.1813, 2.0619, 2.0999],
+            #                                 up=[0.1204, -0.9852, 0.1215])
+            
+            # Segmatation pcd update
+            outlier_cloud = table_pcd.select_by_index(inliers, invert=True)
+            table_pcd = outlier_cloud
+
+            # Append detected plane
+            if b > 0:
+                detected_plane_idx.append(inlier_cloud)
+                detected_plane_d.append(d)
+
+            # Condition to stop pcd segmetation  
             if len(detected_plane_idx) >= num_planes: 
                 num_planes = 2
                 break
+        
+       
+        # Find idx of the table plane 
+        d_max_idx = min(range(len(detected_plane_d)), key=lambda i: abs(detected_plane_d[i]-0))
+        # print(d_max_idx)
+        table_pcd = detected_plane_idx[d_max_idx]
+        
+        # o3d.visualization.draw_geometries([table_pcd],
+        #                                     zoom=0.8,
+        #                                     front=[-0.4999, -0.1659, -0.8499],
+        #                                     lookat=[2.1813, 2.0619, 2.0999],
+        #                                     up=[0.1204, -0.9852, 0.1215])
+
+      
+        # Clustering 
+        cluster_idx = np.array(table_pcd.cluster_dbscan(eps=0.08, min_points=50))
+        
+        # Clusters Index
+        objects_idx = list(set(cluster_idx))
+
+        # Remove noise 
+        #objects_idx.remove(-1) 
+
+        # If exist remove noise (bug solution)
+        if cluster_idx.any() == -1:
+            objects_idx.remove(-1)  
+        
+        colormap = cm.Pastel1(list(range(0,len(objects_idx))))
+        objects=[]
+        for object_idx in objects_idx:
+            
+            object_point_idx = list(locate(cluster_idx, lambda X: X== object_idx))
+            object_points = table_pcd.select_by_index(object_point_idx)
+            object_center = object_points.get_center()
+            # Create a dictionary to represent objects
+            d = {}
+            d['idx'] = str(objects_idx)
+            d['points'] = object_points
+            d['color'] = colormap[object_idx, 0:3]
+            d['points'].paint_uniform_color(d['color'])
+            d['center'] = object_center
+            objects.append(d)
+
+        
+        tables_to_draw=[]
+        minimum_mean_xy = 1000
+        # to draw each object already separated
+        for object in objects:
+            tables_to_draw.append(object['points'])
+            mean_x = object['center'][0]
+            mean_y = object['center'][1]
+            mean_z = object['center'][2]
+            
+            mean_xy = abs(mean_x) + abs(mean_y)
+
+            if mean_xy < minimum_mean_xy:
+                minimum_mean_xy = mean_xy
+                table_cloud = object['points']
+            
+            
+        frame = o3d.geometry.TriangleMesh().create_coordinate_frame(size=1, origin=np.array([0, 0, 0]))
+        tables_to_draw.append(frame)
+            #tables_to_draw.append(object['points'])
+        o3d.visualization.draw_geometries(tables_to_draw)
+        o3d.visualization.draw_geometries([table_cloud])
+        
+
+
+      
 
     def frametransform(self, r, p , y, tx, ty, tz):
 

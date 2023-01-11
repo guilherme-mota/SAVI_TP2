@@ -49,7 +49,7 @@ def main():
     
     # Load PCD
     p = PointCloudProcessing()
-    p.loadpcd('/home/miguel/Documents/SAVI_TP2/docs/rgbd-scenes-v2_pc/rgbd-scenes-v2/pc/14.ply')
+    p.loadpcd('/home/miguel/Documents/SAVI_TP2/docs/rgbd-scenes-v2_pc/rgbd-scenes-v2/pc/14.ply')   
     
     # ------------------------------------
     # Execution 
