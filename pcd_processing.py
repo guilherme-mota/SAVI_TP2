@@ -160,11 +160,14 @@ class PointCloudProcessing():
         o3d.visualization.draw_geometries(tables_to_draw)
         o3d.visualization.draw_geometries([table_cloud])
         
-
-
-      
+        center = table_cloud.get_center()
+        tx, ty, tz = center[0], center[1], center[2]
+        print('tx: ' + str(tx) + 'ty: ' + str(ty) + 'tz: ' + str(tz)) 
+       
+        return(tx, ty, tz)
 
     def frametransform(self, r, p , y, tx, ty, tz):
+    
 
         # Rad to Deg
         r = math.pi * r/180.0
