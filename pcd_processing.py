@@ -152,7 +152,7 @@ class PointCloudProcessing():
             mean_xy = abs(mean_x) + abs(mean_y)
             if mean_xy < minimum_mean_xy:
                 minimum_mean_xy = mean_xy
-                if len(np.asarray(object['points'].points)) > 10000:
+                if len(np.asarray(object['points'].points)) > 12000:
                     print('Mesa')
                     self.table_cloud = object['points']
                 # Quando a segmentação não é bem feita dá erro aqui, é necessário colocar um try catch ou algo do genero 
@@ -169,7 +169,7 @@ class PointCloudProcessing():
         tx, ty, tz = center[0], center[1], center[2]
         print('tx: ' + str(tx) + 'ty: ' + str(ty) + 'tz: ' + str(tz)) 
 
-
+        return(-tx, -ty, -tz)
 
     def frametransform(self, r, p , y, tx, ty, tz):
     
@@ -207,19 +207,21 @@ class PointCloudProcessing():
         self.bbox.color = (0, 1, 0)
         self.pcd = self.pcd.crop(self.bbox)
         
-    def planesegmentation(self, distance_threshold=0.02, ransac_n=3, num_iterations=100):
+    def planesegmentation(self, distance_threshold=0.01, ransac_n=3, num_iterations=100):
         
-        #plane_model, inliers = self.pcd.segment_plane(distance_threshold,ransac_n, num_iterations)
-        plane_model, inliers = self.table_cloud.segment_plane(distance_threshold,ransac_n, num_iterations)
+        plane_model, inliers = self.pcd.segment_plane(distance_threshold,ransac_n, num_iterations)
+        #plane_model, inliers = self.table_cloud.segment_plane(distance_threshold,ransac_n, num_iterations)
         
         [a, b, c, d] = plane_model
         
         #print(f"Plane equation: {a:.2f}x + {b:.2f}y + {c:.2f}z + {d:.2f} = 0")
 
-        self.inliers = self.table_cloud.select_by_index(inliers)
+        self.inliers = self.pcd.select_by_index(inliers)
         
-        self.outlier_cloud = self.table_cloud.select_by_index(inliers, invert=True)
-
+        self.outlier_cloud = self.pcd.select_by_index(inliers, invert=True)
+        
+        #self.inliers = self.table_cloud.select_by_index(inliers)
+        #self.outlier_cloud = self.table_cloud.select_by_index(inliers, invert=True)
         
 
     def pcdclustering(self):

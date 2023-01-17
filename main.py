@@ -46,7 +46,7 @@ def main():
     
     # Load PCD
     p = PointCloudProcessing()
-    p.loadpcd('/home/miguel/Documents/SAVI_TP2/docs/rgbd-scenes-v2_pc/rgbd-scenes-v2/pc/01.ply')   
+    p.loadpcd('/home/miguel/Documents/SAVI_TP2/docs/rgbd-scenes-v2_pc/rgbd-scenes-v2/pc/06.ply')   
     
     # ------------------------------------
     # Execution 
@@ -56,16 +56,23 @@ def main():
     p.downsample()
 
     # Adjustment of coordiante system to the table
-    p.frameadjustment()        
+    tx, ty, tz = p.frameadjustment()        
     o3d.visualization.draw_geometries([p.table_cloud])
+    
+    # Transf do Stor
     #p.frametransform(-108, 0, 0, 0, 0, 0)
     #p.frametransform(0, 0, -37, 0, 0, 0)
     #p.frametransform(0, 0, 0, -0.85, -1.10, 0.35)
-    #p.frametransform(0, 0, 0, tx, ty, tz)
-    
 
+    p.frametransform(0, 0, 0, tx, ty, tz)
+    p.frametransform(-108, 0, 0, 0, 0, 0)
+    p.frametransform(0, 0, -37, 0, 0, 0)
+    
     # Isolation of interest part (table + objects)
+    # BBOX do stor
     #p.croppcd(-0.7, -0.7, -0.1, 0.9, 0.7, 0.4)
+
+    p.croppcd(-0.6, -0.6, -0.02, 0.6, 0.6, 0.4)
 
     # Plane segmentation ---> Table detection and objects isolation
     p.planesegmentation()
@@ -79,8 +86,8 @@ def main():
 
     #Draw BBox
     entities_to_draw = []
-    #bbox = o3d.geometry.LineSet.create_from_axis_aligned_bounding_box(p.bbox)
-    #entities_to_draw.append(bbox)
+    bbox = o3d.geometry.LineSet.create_from_axis_aligned_bounding_box(p.bbox)
+    entities_to_draw.append(bbox)
 
     # Draw Table Plane
     p.inliers.paint_uniform_color([0.9,0.9,1])
@@ -109,7 +116,7 @@ def main():
                                             zoom = view['trajectory'][0]['zoom'],
                                             front = view['trajectory'][0]['front'],
                                             lookat = view['trajectory'][0]['lookat'],
-                                            up = view['trajectory'][0]['up'])
+                                            up = view['trajectory'][0]['up'])    
 
 
 if __name__ == "__main__":
