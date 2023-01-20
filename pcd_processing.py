@@ -16,6 +16,7 @@ import pandas as pd
 from matplotlib import cm
 import math
 
+
 # ------------------------------------
 # View
 # ------------------------------------
@@ -112,6 +113,7 @@ class PointCloudProcessing():
 
         # Remove noise 
         #objects_idx.remove(-1) 
+
         # If exist remove noise (bug solution)
         if cluster_idx.any() == -1:
             objects_idx.remove(-1)  
@@ -153,7 +155,7 @@ class PointCloudProcessing():
             if mean_xy < minimum_mean_xy:
                 minimum_mean_xy = mean_xy
                 if len(np.asarray(object['points'].points)) > 12000:
-                    print('Mesa')
+                    #print('Mesa')
                     self.table_cloud = object['points']
                 # Quando a segmentação não é bem feita dá erro aqui, é necessário colocar um try catch ou algo do genero 
 
@@ -167,7 +169,7 @@ class PointCloudProcessing():
         
         center = self.table_cloud.get_center()
         tx, ty, tz = center[0], center[1], center[2]
-        print('tx: ' + str(tx) + 'ty: ' + str(ty) + 'tz: ' + str(tz)) 
+        #print('tx: ' + str(tx) + 'ty: ' + str(ty) + 'tz: ' + str(tz)) 
 
         return(-tx, -ty, -tz)
 
@@ -227,17 +229,17 @@ class PointCloudProcessing():
     def pcdclustering(self):
         
         # Clustering 
-        cluster_idx = np.array(self.outlier_cloud.cluster_dbscan(eps=0.05, min_points=60, print_progress=True))
+        cluster_idx = np.array(self.outlier_cloud.cluster_dbscan(eps=0.030, min_points=60, print_progress=True))
         
         # Clusters Index
         objects_idx = list(set(cluster_idx))
 
         # Remove noise 
-        #objects_idx.remove(-1) 
+        objects_idx.remove(-1) 
 
         # If exist remove noise (bug solution)
-        if cluster_idx.any() == -1:
-            objects_idx.remove(-1)  
+        # if objects_idx.any() == -1:
+        #     objects_idx.remove(-1)  
         
         colormap = cm.Pastel1(list(range(0,len(objects_idx))))
         objects=[]
@@ -252,8 +254,44 @@ class PointCloudProcessing():
             d['points'] = object_points
             d['color'] = colormap[object_idx, 0:3]
             d['points'].paint_uniform_color(d['color'])
-        
+
+
+            # -------------- STDeviation of each coordinate about XY and Z Axis ------------------
+
+            
+            # points = len(np.asarray(object_points.points))
+            # x_coordnites = []
+            # y_coordnites = []
+            # z_coordnites = []
+
+            # for num in range(points):
+            #     # print(np.asarray(object_points.points[num][0]))
+            #     # print(np.asarray(object_points.points[num][1]))
+            #     # print(np.asarray(object_points.points[num][2]))
+            #     x_coordnites.append(np.asarray(object_points.points[num][0]))
+            #     y_coordnites.append(np.asarray(object_points.points[num][1]))
+            #     z_coordnites.append(np.asarray(object_points.points[num][2]))
+
+            # stdeviation_x = np.std(x_coordnites)
+            # print('desvio padrão das coord no eixo do x, obj: ' +  str(object_idx) + ' ' + str(stdeviation_x))
+            # stdeviation_y = np.std(y_coordnites)
+            # print('desvio padrão das coord no eixo do y, obj: ' +  str(object_idx) + ' ' + str(stdeviation_y))
+            # stdeviation_z = np.std(z_coordnites)
+            # print('desvio padrão das coord no eixo do z, obj: ' +  str(object_idx) + ' ' + str(stdeviation_z))
+
+            # # print(np.asarray(object_points.points[0]))
+            # # print(np.asarray(object_points.points[0][0]))
+            # # print(len(np.asarray(object_points.points)))
+
+      
             objects.append(d)
+
+
+
+        
+
+
+
 
         self.objects_to_draw=[]
 

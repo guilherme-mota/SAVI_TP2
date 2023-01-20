@@ -46,7 +46,7 @@ def main():
     
     # Load PCD
     p = PointCloudProcessing()
-    p.loadpcd('/home/miguel/Documents/SAVI_TP2/docs/rgbd-scenes-v2_pc/rgbd-scenes-v2/pc/06.ply')   
+    p.loadpcd('/home/miguel/Documents/SAVI_TP2/docs/rgbd-scenes-v2_pc/rgbd-scenes-v2/pc/01.ply')   
     
     # ------------------------------------
     # Execution 
@@ -55,23 +55,15 @@ def main():
     # Pre Processing with Voxel downsampling to increase process velocity
     p.downsample()
 
-    # Adjustment of coordiante system to the table
+    # Calculation of the reference transformation parameters for the center of the table - In this case only for TRANS
     tx, ty, tz = p.frameadjustment()        
-    o3d.visualization.draw_geometries([p.table_cloud])
-    
-    # Transf do Stor
-    #p.frametransform(-108, 0, 0, 0, 0, 0)
-    #p.frametransform(0, 0, -37, 0, 0, 0)
-    #p.frametransform(0, 0, 0, -0.85, -1.10, 0.35)
 
+    # Frame Transform
     p.frametransform(0, 0, 0, tx, ty, tz)
     p.frametransform(-108, 0, 0, 0, 0, 0)
     p.frametransform(0, 0, -37, 0, 0, 0)
     
     # Isolation of interest part (table + objects)
-    # BBOX do stor
-    #p.croppcd(-0.7, -0.7, -0.1, 0.9, 0.7, 0.4)
-
     p.croppcd(-0.6, -0.6, -0.02, 0.6, 0.6, 0.4)
 
     # Plane segmentation ---> Table detection and objects isolation
@@ -92,7 +84,7 @@ def main():
     # Draw Table Plane
     p.inliers.paint_uniform_color([0.9,0.9,1])
     correct_center = p.inliers.get_center()
-    print('correct center: ' + str(correct_center))
+    #print('correct center: ' + str(correct_center))
     entities_to_draw.append(p.inliers) # Draw only de plane (ouliers are the objects)
     
     # Create coordinate system
@@ -101,7 +93,7 @@ def main():
     
     # Draw objects 
     num_of_objects = len(p.objects_to_draw)
-    print('Number of objects = ' + str(num_of_objects) + '     ')
+    print('Number of detected objects = ' + str(num_of_objects) + '     ')
     
     # Draw table plane + frame + objects
     entities_to_draw = np.concatenate((entities_to_draw, p.objects_to_draw))
