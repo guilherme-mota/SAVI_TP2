@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # -------------------------------------------------------------------------------
 # Name:        main
 # Purpose:     AI system to detect and track objects
@@ -42,11 +44,12 @@ def main():
     # Initialization 
     # ------------------------------------
 
-    print('Starting Scene 3D Processing...')
+    print('Starting Scene 3D Processing...\n')
     
     # Load PCD
     p = PointCloudProcessing()
-    p.loadpcd('/home/miguel/Documents/SAVI_TP2/docs/rgbd-scenes-v2_pc/rgbd-scenes-v2/pc/01.ply')   
+    # /home/miguel/Documents/SAVI_TP2/docs/rgbd-scenes-v2_pc/rgbd-scenes-v2/pc/01.ply
+    p.loadpcd('docs/rgbd-scenes-v2_pc/rgbd-scenes-v2/pc/01.ply')   
     
     # ------------------------------------
     # Execution 
