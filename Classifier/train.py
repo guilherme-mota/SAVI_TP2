@@ -22,9 +22,9 @@ def main():
     # Initialization
     # -----------------------------------------------------------------
     # Define hyper parameters
-    resume_training = False
+    resume_training = True
     learning_rate = 0.001
-    maximum_num_epochs = 10 
+    maximum_num_epochs = 3
     termination_loss_threshold =  0.01
     loss_function = torch.nn.CrossEntropyLoss()
     model = Model()  # Instantiate model
@@ -42,7 +42,7 @@ def main():
     image_filenames = glob.glob(dataset_path + '/*.png')
 
     # Sample only a few images to speed up development
-    image_filenames = random.sample(image_filenames, k=400)
+    # image_filenames = random.sample(image_filenames, k=400)
 
     # Create the dataset
     dataset_train = Dataset(image_filenames)
