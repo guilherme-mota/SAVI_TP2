@@ -24,7 +24,7 @@ def main():
     # Define hyper parameters
     resume_training = True
     learning_rate = 0.001
-    maximum_num_epochs = 3
+    maximum_num_epochs = 6
     termination_loss_threshold =  0.01
     loss_function = torch.nn.CrossEntropyLoss()
     model = Model()  # Instantiate model
@@ -46,7 +46,7 @@ def main():
 
     # Create the dataset
     dataset_train = Dataset(image_filenames)
-    loader_train = torch.utils.data.DataLoader(dataset=dataset_train, batch_size=256, shuffle=True)
+    loader_train = torch.utils.data.DataLoader(dataset=dataset_train, batch_size=648, shuffle=True)
 
     # -----------------------------------------------------------------
     # Training
@@ -60,7 +60,7 @@ def main():
         checkpoint = torch.load(model_path)
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        idx_epoch = checkpoint['epoch']
+        idx_epoch = checkpoint['epoch'] + 1
         epoch_train_losses = checkpoint['train_losses']
     else:
         idx_epoch = 0
