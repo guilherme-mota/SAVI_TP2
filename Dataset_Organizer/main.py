@@ -13,30 +13,46 @@ import random
 def main():
 
     # Get the name of folders in a directory
-    directory = '/home/guilherme/SAVI_Datasets/rgbd-dataset/train'
-    imgs = os.listdir(directory)
+    directory = '/home/guilherme/SAVI_Datasets/rgbd-scenes-v2_imgs/rgbd-scenes-v2/imgs'
+    folders = os.listdir(directory)
+    folders.sort()
+
+    print(str(folders) + '\n')
+
+    for idx,folder in enumerate(folders):
+
+        # Remove unnecessary imgs from scenes
+        # files_to_delete = glob.glob(directory + '/' + folder + '/' + '/*depth.png')
+        # for file in files_to_delete:
+        #     os.remove(file)
+
+        # Copy first image from each scene folder
+        imgs = glob.glob(directory + '/' + folder + '/' + '/*.png')
+        imgs.sort()
+        shutil.copyfile(imgs[0], '/home/guilherme/SAVI_TP2/docs/rgbd-scenes-v2_imgs/' + folders[idx] +'.png')
+
     
-    # Reorder folders in Alphabetical Order
-    imgs.sort()
-    print(imgs[0] + '\n')
+    # Reorder images in Alphabetical Order
+    # imgs.sort()
+    # print(imgs[0] + '\n')
     
     # List of Class names
-    class_names = []
-    for img in imgs:
-        parts = img.split('/')
-        part = parts[-1]
-        parts = part.split('_')
+    # class_names = []
+    # for img in imgs:
+    #     parts = img.split('/')
+    #     part = parts[-1]
+    #     parts = part.split('_')
 
-        # Class name -> class_name_#_#_#_crop.png
-        if len(parts) - 4 == 1:
-            class_name = parts[0]
-        else:
-            class_name = parts[0] + '_' + parts[1]
+    #     # Class name -> class_name_#_#_#_crop.png
+    #     if len(parts) - 4 == 1:
+    #         class_name = parts[0]
+    #     else:
+    #         class_name = parts[0] + '_' + parts[1]
 
-        class_names.append(class_name)
+    #     class_names.append(class_name)
 
-    class_names = list(dict.fromkeys(class_names))
-    class_names.sort()
+    # class_names = list(dict.fromkeys(class_names))
+    # class_names.sort()
     
     # List of images
     # imgs = glob.glob(directory + '/*.png')
@@ -47,15 +63,15 @@ def main():
     # ---------------------------
     # Create txt file with code 2
     # ---------------------------
-    file = open("python_code2.txt", "w")
-    # Insert text in file
-    for idx,c_name in enumerate(class_names):
-        if idx == 0:
-            file.write("if label == " + str(idx) + ":\r\n\ttitle = '" + c_name + "'")
-        else:
-            file.write("\r\nelif label == " + str(idx) + ":\r\n\ttitle = '" + c_name + "'")
-    # Close file
-    file.close()
+    # file = open("python_code2.txt", "w")
+    # # Insert text in file
+    # for idx,c_name in enumerate(class_names):
+    #     if idx == 0:
+    #         file.write("if label == " + str(idx) + ":\r\n\ttitle = '" + c_name + "'")
+    #     else:
+    #         file.write("\r\nelif label == " + str(idx) + ":\r\n\ttitle = '" + c_name + "'")
+    # # Close file
+    # file.close()
 
 
     # ------------------------------------------------
