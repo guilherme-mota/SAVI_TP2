@@ -13,16 +13,49 @@ import random
 def main():
 
     # Get the name of folders in a directory
-    directory = '/home/guilherme/SAVI_Datasets/rgbd-dataset/'
-    folders = os.listdir(directory)
+    directory = '/home/guilherme/SAVI_Datasets/rgbd-dataset/train'
+    imgs = os.listdir(directory)
     
     # Reorder folders in Alphabetical Order
-    print(folders[0] + '\n')
+    imgs.sort()
+    print(imgs[0] + '\n')
+    
+    # List of Class names
+    class_names = []
+    for img in imgs:
+        parts = img.split('/')
+        part = parts[-1]
+        parts = part.split('_')
 
+        # Class name -> class_name_#_#_#_crop.png
+        if len(parts) - 4 == 1:
+            class_name = parts[0]
+        else:
+            class_name = parts[0] + '_' + parts[1]
+
+        class_names.append(class_name)
+
+    class_names = list(dict.fromkeys(class_names))
+    class_names.sort()
+    
     # List of images
-    imgs = glob.glob(directory + '/*.png')
-    print(str(len(imgs)) + ' imagens\n')
+    # imgs = glob.glob(directory + '/*.png')
+    # print(str(len(imgs)) + ' imagens\n')
     # imgs[0] -> /home/guilherme/SAVI_Datasets/rgbd-dataset/apple_1_1_100_crop.png
+
+
+    # ---------------------------
+    # Create txt file with code 2
+    # ---------------------------
+    file = open("python_code2.txt", "w")
+    # Insert text in file
+    for idx,c_name in enumerate(class_names):
+        if idx == 0:
+            file.write("if label == " + str(idx) + ":\r\n\ttitle = '" + c_name + "'")
+        else:
+            file.write("\r\nelif label == " + str(idx) + ":\r\n\ttitle = '" + c_name + "'")
+    # Close file
+    file.close()
 
 
     # ------------------------------------------------
@@ -51,9 +84,9 @@ def main():
     # for img in folders:
     #     print(img + '\n')
 
-    # -------------------------
-    # Create txt file with code
-    # -------------------------
+    # ---------------------------
+    # Create txt file with code 1
+    # ---------------------------
     # file = open("python_code.txt", "w")
     # # Insert text in file
     # for idx,folder in enumerate(folders):
