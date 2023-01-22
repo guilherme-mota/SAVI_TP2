@@ -24,7 +24,7 @@ def main():
     # Define hyper parameters
     resume_training = True
     learning_rate = 0.001
-    maximum_num_epochs = 6
+    maximum_num_epochs = 8
     termination_loss_threshold =  0.01
     loss_function = torch.nn.CrossEntropyLoss()
     model = Model()  # Instantiate model
