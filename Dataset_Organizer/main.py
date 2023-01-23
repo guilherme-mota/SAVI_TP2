@@ -4,32 +4,83 @@
 # -------
 # Imports
 # -------
+import copy
 import os
 import glob
 import shutil
 import random
+import open3d as o3d
+import numpy as np
+
+
+view = {
+	"class_name" : "ViewTrajectory",
+	"interval" : 29,
+	"is_loop" : False,
+	"trajectory" : 
+	[
+		{
+			"boundingbox_max" : [ 2.7116048336029053, 1.2182252407073975, 3.8905272483825684 ],
+			"boundingbox_min" : [ -2.4257750511169434, -1.6397310495376587, -1.3339539766311646 ],
+			"field_of_view" : 60.0,
+			"front" : [ -0.28501003865496566, -0.058925242216379133, -0.9567116042442656 ],
+			"lookat" : [ 0.01567582102129144, -0.14366111642786508, -0.84817342536083562 ],
+			"up" : [ 0.32274283088644168, -0.94572764903285944, -0.037898271282295948 ],
+			"zoom" : 0.099999999999998507
+		}
+	],
+	"version_major" : 1,
+	"version_minor" : 0
+}
 
 
 def main():
 
-    # Get the name of folders in a directory
-    directory = '/home/guilherme/SAVI_Datasets/rgbd-scenes-v2_imgs/rgbd-scenes-v2/imgs'
-    folders = os.listdir(directory)
-    folders.sort()
+    # ---------------------
+    # Finding correct Frame
+    # ---------------------
+    entities_to_draw = []
 
-    print(str(folders) + '\n')
+    # Open Point Cloud File
+    point_cloud = o3d.io.read_point_cloud('../docs/rgbd-scenes-v2_pc/rgbd-scenes-v2/pc/05.ply')
+    entities_to_draw.append(point_cloud)
 
-    for idx,folder in enumerate(folders):
+    # Create coordinate system
+    frame = o3d.geometry.TriangleMesh().create_coordinate_frame(size=0.2, origin=np.array([0, 0, 0]))
+    # entities_to_draw.append(frame)
 
-        # Remove unnecessary imgs from scenes
-        # files_to_delete = glob.glob(directory + '/' + folder + '/' + '/*depth.png')
-        # for file in files_to_delete:
-        #     os.remove(file)
+    # New coordinate system
+    frame_new = copy.deepcopy(frame)
+    R = frame.get_rotation_matrix_from_quaternion((0.921813, 0.00529826, -0.352849, -0.160437))
+    frame_new.rotate(R)  # , center=(0, 0, 0)
+    frame_new.translate((1.95311, -0.199785, 0.338855))
+    entities_to_draw.append(frame_new)
 
-        # Copy first image from each scene folder
-        imgs = glob.glob(directory + '/' + folder + '/' + '/*.png')
-        imgs.sort()
-        shutil.copyfile(imgs[0], '/home/guilherme/SAVI_TP2/docs/rgbd-scenes-v2_imgs/' + folders[idx] +'.png')
+    # Visualize Point Cloud with Reference Frame
+    o3d.visualization.draw_geometries(entities_to_draw,
+                                        zoom = view['trajectory'][0]['zoom'],
+                                        front = view['trajectory'][0]['front'],
+                                        lookat = view['trajectory'][0]['lookat'],
+                                        up = view['trajectory'][0]['up'])
+
+    # # Get the name of folders in a directory
+    # directory = '/home/guilherme/SAVI_Datasets/rgbd-scenes-v2_imgs/rgbd-scenes-v2/imgs'
+    # folders = os.listdir(directory)
+    # folders.sort()
+
+    # print(str(folders) + '\n')
+
+    # for idx,folder in enumerate(folders):
+
+    #     # Remove unnecessary imgs from scenes
+    #     # files_to_delete = glob.glob(directory + '/' + folder + '/' + '/*depth.png')
+    #     # for file in files_to_delete:
+    #     #     os.remove(file)
+
+    #     # Copy first image from each scene folder
+    #     imgs = glob.glob(directory + '/' + folder + '/' + '/*.png')
+    #     imgs.sort()
+    #     shutil.copyfile(imgs[0], '/home/guilherme/SAVI_TP2/docs/rgbd-scenes-v2_imgs/' + folders[idx] +'.png')
 
     
     # Reorder images in Alphabetical Order
