@@ -15,7 +15,8 @@ from more_itertools import locate
 import pandas as pd
 from matplotlib import cm
 import math
-
+import copy
+import os
 
 # ------------------------------------
 # View
@@ -51,6 +52,7 @@ class PointCloudProcessing():
         # Load PCD
         self.originalpcd = o3d.io.read_point_cloud(filepath)
         self.pcd = self.originalpcd
+
         
     def downsample(self):
 
@@ -59,6 +61,16 @@ class PointCloudProcessing():
 
     def frameadjustment(self, distance_threshold=0.08, ransac_n=5, num_iterations=100):
         
+        frame = o3d.geometry.TriangleMesh().create_coordinate_frame(size=1, origin=np.array([0, 0, 0]))
+        
+        # Frame Transform CAM to BEST FRAME CAM POS
+        # R = frame.get_rotation_matrix_from_quaternion((0.923902, 0.0034424, -0.348289, -0.158423))
+        # frame.rotate(R)  # , center=(0, 0, 0)
+        # frame.translate((1.93816, -0.19751, 0.331437))
+
+
+
+
         # -------- Segmentation ----------
         
         # Segmentation Vars
@@ -160,9 +172,18 @@ class PointCloudProcessing():
                 # Quando a segmentação não é bem feita dá erro aqui, é necessário colocar um try catch ou algo do genero 
 
 
-        # -------- Visualization ----------
-        frame = o3d.geometry.TriangleMesh().create_coordinate_frame(size=1, origin=np.array([0, 0, 0]))
+        # -------- Frames ----------
+        #frame = o3d.geometry.TriangleMesh().create_coordinate_frame(size=1, origin=np.array([0, 0, 0]))
         tables_to_draw.append(frame)
+
+        # # Frame Transform CAM to BEST FRAME CAM POS
+        # frame_new = copy.deepcopy(frame)
+        # R = frame.get_rotation_matrix_from_quaternion((0.923902, 0.0034424, -0.348289, -0.158423))
+        # frame_new.rotate(R)  # , center=(0, 0, 0)
+        # frame_new.translate((1.93816, -0.19751, 0.331437))
+        # tables_to_draw.append(frame_new)
+
+        # -------- Visualization ----------
         #tables_to_draw.append(object['points'])
         o3d.visualization.draw_geometries(tables_to_draw)
         #o3d.visualization.draw_geometries([table_cloud])
@@ -241,21 +262,22 @@ class PointCloudProcessing():
         # if objects_idx.any() == -1:
         #     objects_idx.remove(-1)  
         
-        colormap = cm.Pastel1(list(range(0,len(objects_idx))))
+        #colormap = cm.Pastel1(list(range(0,len(objects_idx))))
         objects=[]
+       
         for object_idx in objects_idx:
             
             object_point_idx = list(locate(cluster_idx, lambda X: X== object_idx))
             object_points = self.outlier_cloud.select_by_index(object_point_idx)
-
+            object_center = object_points.get_center()
             # Create a dictionary to represent objects
             d = {}
             d['idx'] = str(objects_idx)
             d['points'] = object_points
-            d['color'] = colormap[object_idx, 0:3]
-            d['points'].paint_uniform_color(d['color'])
-
-
+            #d['color'] = colormap[object_idx, 0:3]
+            #d['points'].paint_uniform_color(d['color'])
+            d['center'] = object_center
+            print('center of object' + str(object_idx) + ': ' + str(object_center))
             # -------------- STDeviation of each coordinate about XY and Z Axis ------------------
 
             
@@ -285,20 +307,14 @@ class PointCloudProcessing():
 
       
             objects.append(d)
-
-
-
         
-
-
-
 
         self.objects_to_draw=[]
 
         # to draw each object already separated
         for object in objects:
             self.objects_to_draw.append(object['points'])
-            
-        
+
+
 
         
