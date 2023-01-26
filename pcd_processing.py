@@ -150,6 +150,7 @@ class PointCloudProcessing():
             d['color'] = colormap[object_idx, 0:3]
             d['points'].paint_uniform_color(d['color'])
             d['center'] = object_center
+            
             objects.append(d)
 
         # -------- Table Selection ----------
@@ -169,6 +170,7 @@ class PointCloudProcessing():
                 if len(np.asarray(object['points'].points)) > 12000:
                     #print('Mesa')
                     self.table_cloud = object['points']
+                    
                 # Quando a segmentação não é bem feita dá erro aqui, é necessário colocar um try catch ou algo do genero 
 
 
@@ -190,7 +192,7 @@ class PointCloudProcessing():
         
         center = self.table_cloud.get_center()
         tx, ty, tz = center[0], center[1], center[2]
-        #print('tx: ' + str(tx) + 'ty: ' + str(ty) + 'tz: ' + str(tz)) 
+        print('tx: ' + str(tx) + 'ty: ' + str(ty) + 'tz: ' + str(tz)) 
 
         return(-tx, -ty, -tz)
 
@@ -316,8 +318,8 @@ class PointCloudProcessing():
             bbox_points = o3d.utility.Vector3dVector(np_points)
 
             obj_bbox = o3d.geometry.AxisAlignedBoundingBox.create_from_points(bbox_points)
-            # obj_bbox.color = (0,1,0)
-            obj_bbox.color = (d['color'])
+            obj_bbox.color = (0,1,0)
+            #obj_bbox.color = (d['color'])
             d['bbox'] = obj_bbox
 
             # stdeviation_x = np.std(x_coordnites)
