@@ -91,7 +91,7 @@ def main():
     entities_to_draw = []
     bbox = o3d.geometry.LineSet.create_from_axis_aligned_bounding_box(p.bbox)
     entities_to_draw.append(bbox)
-
+    
     # Draw Table Plane
     p.inliers.paint_uniform_color([0.9,0.9,1])
     correct_center = p.inliers.get_center()

@@ -262,9 +262,8 @@ class PointCloudProcessing():
         # if objects_idx.any() == -1:
         #     objects_idx.remove(-1)  
         
-        #colormap = cm.Pastel1(list(range(0,len(objects_idx))))
+        colormap = cm.Pastel1(list(range(0,len(objects_idx))))
         objects=[]
-       
         for object_idx in objects_idx:
             
             object_point_idx = list(locate(cluster_idx, lambda X: X== object_idx))
@@ -274,25 +273,52 @@ class PointCloudProcessing():
             d = {}
             d['idx'] = str(objects_idx)
             d['points'] = object_points
-            #d['color'] = colormap[object_idx, 0:3]
+            d['color'] = colormap[object_idx, 0:3]
             #d['points'].paint_uniform_color(d['color'])
             d['center'] = object_center
-            print('center of object' + str(object_idx) + ': ' + str(object_center))
+            #print('center of object' + str(object_idx) + ': ' + str(object_center))
+
+
             # -------------- STDeviation of each coordinate about XY and Z Axis ------------------
 
             
-            # points = len(np.asarray(object_points.points))
-            # x_coordnites = []
-            # y_coordnites = []
-            # z_coordnites = []
+            points = len(np.asarray(object_points.points))
+            x_coordinates = []
+            y_coordinates = []
+            z_coordinates = []
+            
+            for num in range(points):
+                # print(np.asarray(object_points.points[num][0]))
+                # print(np.asarray(object_points.points[num][1]))
+                # print(np.asarray(object_points.points[num][2]))
+                x_coordinates.append(np.asarray(object_points.points[num][0]))
+                y_coordinates.append(np.asarray(object_points.points[num][1]))
+                z_coordinates.append(np.asarray(object_points.points[num][2]))
 
-            # for num in range(points):
-            #     # print(np.asarray(object_points.points[num][0]))
-            #     # print(np.asarray(object_points.points[num][1]))
-            #     # print(np.asarray(object_points.points[num][2]))
-            #     x_coordnites.append(np.asarray(object_points.points[num][0]))
-            #     y_coordnites.append(np.asarray(object_points.points[num][1]))
-            #     z_coordnites.append(np.asarray(object_points.points[num][2]))
+            x_width = max(x_coordinates) - min(x_coordinates)
+            y_width = max(y_coordinates) - min(y_coordinates)
+            z_height = max(z_coordinates) - min(z_coordinates)
+            
+
+            # BBOX 
+            np_points = np.ndarray((8,3), dtype=float)
+            np_points[0, :] = [min(x_coordinates), min(y_coordinates), min(z_coordinates)]
+            np_points[1, :] = [max(x_coordinates), min(y_coordinates), min(z_coordinates)]
+            np_points[2, :] = [max(x_coordinates), max(y_coordinates), min(z_coordinates)]
+            np_points[3, :] = [min(x_coordinates), max(y_coordinates), min(z_coordinates)]
+
+            np_points[4, :] = [min(x_coordinates), min(y_coordinates), max(z_coordinates)]
+            np_points[5, :] = [max(x_coordinates), min(y_coordinates), max(z_coordinates)]
+            np_points[6, :] = [max(x_coordinates), max(y_coordinates), max(z_coordinates)]
+            np_points[7, :] = [min(x_coordinates), max(y_coordinates), max(z_coordinates)]
+
+        
+            bbox_points = o3d.utility.Vector3dVector(np_points)
+
+            obj_bbox = o3d.geometry.AxisAlignedBoundingBox.create_from_points(bbox_points)
+            # obj_bbox.color = (0,1,0)
+            obj_bbox.color = (d['color'])
+            d['bbox'] = obj_bbox
 
             # stdeviation_x = np.std(x_coordnites)
             # print('desvio padrão das coord no eixo do x, obj: ' +  str(object_idx) + ' ' + str(stdeviation_x))
@@ -314,6 +340,7 @@ class PointCloudProcessing():
         # to draw each object already separated
         for object in objects:
             self.objects_to_draw.append(object['points'])
+            self.objects_to_draw.append(object['bbox'])
 
 
 
