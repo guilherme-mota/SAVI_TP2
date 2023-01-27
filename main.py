@@ -10,11 +10,13 @@
 # ------------------------------------
 # Imports
 # ------------------------------------
+import os
+import cv2
+import copy
 import numpy as np
 import open3d as o3d
+from scipy.spatial.transform import Rotation as R
 from pcd_processing import PointCloudProcessing
-import copy
-import os
 
 # ------------------------------------
 # View
@@ -81,7 +83,6 @@ def main():
 
     # Object isolation and caracterization
 
-
     
     # ------------------------------------
     # Visualization
@@ -105,24 +106,75 @@ def main():
 
     # Draw objects 
     num_of_objects = len(p.objects_to_draw)
-    print('Number of detected objects = ' + str(num_of_objects) + '     ')
+    # print('Number of detected objects = ' + str(num_of_objects) + '     ')
     
     # Draw table plane + frame + objects
     entities_to_draw = np.concatenate((entities_to_draw, p.objects_to_draw))
 
-    o3d.visualization.draw_geometries(entities_to_draw,
-                                            zoom = view['trajectory'][0]['zoom'],
-                                            front = view['trajectory'][0]['front'],
-                                            lookat = view['trajectory'][0]['lookat'],
-                                            up = view['trajectory'][0]['up'])
+    # o3d.visualization.draw_geometries(entities_to_draw,
+    #                                         zoom = view['trajectory'][0]['zoom'],
+    #                                         front = view['trajectory'][0]['front'],
+    #                                         lookat = view['trajectory'][0]['lookat'],
+    #                                         up = view['trajectory'][0]['up'])
 
-    o3d.visualization.draw_geometries(p.objects_to_draw,
-                                            zoom = view['trajectory'][0]['zoom'],
-                                            front = view['trajectory'][0]['front'],
-                                            lookat = view['trajectory'][0]['lookat'],
-                                            up = view['trajectory'][0]['up'])    
+    # o3d.visualization.draw_geometries(p.objects_to_draw,
+    #                                         zoom = view['trajectory'][0]['zoom'],
+    #                                         front = view['trajectory'][0]['front'],
+    #                                         lookat = view['trajectory'][0]['lookat'],
+    #                                         up = view['trajectory'][0]['up'])
 
+    
+    # --------------------------------------
+    # Classification of objects in the scene
+    # --------------------------------------
+    print('\n')
 
+    # Intrinsic Matrix
+    intrinsic_matrix = np.matrix([[570.3,      0, 0, 320],
+                                  [    0,  570.3, 0, 240],
+                                  [    0,      0, 1,   0],
+                                  [    0,      0, 0,   1]], copy=False,  dtype=np.float64)
+    print('Camera Intrinsic Matrix: ' + str(intrinsic_matrix) + '\n')
+
+    # 0.92118 0.00982951 -0.355027 -0.15905 1.96118 -0.200736 0.341896
+    # Convert quaternion to rotation matrix
+    r = R.from_quat([0.92118, 0.00982951, -0.355027, -0.15905])
+    rotation = r.as_matrix()
+    print('Rotation: ' + str(rotation) + '\n')
+
+    translation = np.array([1.96118, -0.200736, 0.341896], dtype = np.float64)
+    print('Translation: ' + str(translation) + '\n')
+
+    # Print Ccnter position of each object
+    center = np.asmatrix(np.zeros((4,1)))
+    for obj in p.objects_properties:
+        print('object center: ' + str(obj['center']) + ' - ' + str(type(obj['center'])) + '\n')
+
+        # Conversão para matriz e homegenização
+        center[0:3,0] = np.asmatrix(obj['center']).T
+        center[3,0]= 1
+        print(str(center) + '\n')
+
+    # Show Scene image
+    img = cv2.imread("docs/rgbd-scenes-v2_imgs/00404-color.png")
+
+    rvec = cv2.Rodrigues(rotation)
+    print('rvec: ' + str(rvec) + ' - ' + str(type(rvec)) + '\n')
+    distCoeffs = np.array([0, 0, 0, 0], dtype=np.float64)
+
+    # imagePoints,_ = cv2.projectPoints(np.array(center), rvec[0], translation, intrinsic_matrix, distCoeffs)
+    # print('Image Points: ' + str(imagePoints) + '\n')
+
+    coords = np.array([[4.27874, 115.15968, 18.1621], [27.52924, 113.3441, 17.70207]])
+    cop = np.array([-14.45194, 34.59882, 19.11343])
+    points_2d = cv2.projectPoints(np.array(coords), (0,0,0), (0,0,0), intrinsic_matrix, distCoeffs)
+
+    cv2.imshow("Display window", img)
+
+    k = cv2.waitKey(0)
+
+    if k == ord("s"):
+        cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":

@@ -62,14 +62,6 @@ class PointCloudProcessing():
     def frameadjustment(self, distance_threshold=0.08, ransac_n=5, num_iterations=100):
         
         frame = o3d.geometry.TriangleMesh().create_coordinate_frame(size=1, origin=np.array([0, 0, 0]))
-        
-        # Frame Transform CAM to BEST FRAME CAM POS
-        # R = frame.get_rotation_matrix_from_quaternion((0.923902, 0.0034424, -0.348289, -0.158423))
-        # frame.rotate(R)  # , center=(0, 0, 0)
-        # frame.translate((1.93816, -0.19751, 0.331437))
-
-
-
 
         # -------- Segmentation ----------
         
@@ -178,27 +170,20 @@ class PointCloudProcessing():
         #frame = o3d.geometry.TriangleMesh().create_coordinate_frame(size=1, origin=np.array([0, 0, 0]))
         tables_to_draw.append(frame)
 
-        # # Frame Transform CAM to BEST FRAME CAM POS
-        # frame_new = copy.deepcopy(frame)
-        # R = frame.get_rotation_matrix_from_quaternion((0.923902, 0.0034424, -0.348289, -0.158423))
-        # frame_new.rotate(R)  # , center=(0, 0, 0)
-        # frame_new.translate((1.93816, -0.19751, 0.331437))
-        # tables_to_draw.append(frame_new)
-
         # -------- Visualization ----------
         #tables_to_draw.append(object['points'])
-        o3d.visualization.draw_geometries(tables_to_draw)
+        #o3d.visualization.draw_geometries(tables_to_draw)
         #o3d.visualization.draw_geometries([table_cloud])
         
         center = self.table_cloud.get_center()
         tx, ty, tz = center[0], center[1], center[2]
-        print('tx: ' + str(tx) + 'ty: ' + str(ty) + 'tz: ' + str(tz)) 
+        print('tx: ' + str(tx) + ' ty: ' + str(ty) + ' tz: ' + str(tz) + '\n') 
 
         return(-tx, -ty, -tz)
 
+
     def frametransform(self, r, p , y, tx, ty, tz):
     
-
         # Rad to Deg
         r = math.pi * r/180.0
         p = math.pi * p/180.0
@@ -210,6 +195,7 @@ class PointCloudProcessing():
 
         # Translate
         self.pcd = self.pcd.translate((tx, ty, tz))
+
         
     def croppcd(self, x_min, y_min, z_min, x_max, y_max, z_max):
         
@@ -231,6 +217,7 @@ class PointCloudProcessing():
         self.bbox = o3d.geometry.AxisAlignedBoundingBox.create_from_points(bbox_points)
         self.bbox.color = (0, 1, 0)
         self.pcd = self.pcd.crop(self.bbox)
+
         
     def planesegmentation(self, distance_threshold=0.01, ransac_n=3, num_iterations=100):
         
@@ -273,7 +260,7 @@ class PointCloudProcessing():
             object_center = object_points.get_center()
             # Create a dictionary to represent objects
             d = {}
-            d['idx'] = str(objects_idx)
+            d['idx'] = str(objects_idx[object_idx])
             d['points'] = object_points
             d['color'] = colormap[object_idx, 0:3]
             #d['points'].paint_uniform_color(d['color'])
@@ -335,6 +322,10 @@ class PointCloudProcessing():
 
       
             objects.append(d)
+
+
+        # Pass value to attributes of the class
+        self.objects_properties = objects
         
 
         self.objects_to_draw=[]
