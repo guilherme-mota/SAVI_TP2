@@ -17,6 +17,10 @@ import numpy as np
 import open3d as o3d
 from scipy.spatial.transform import Rotation as R
 from pcd_processing import PointCloudProcessing
+import open3d.visualization.gui as gui
+import open3d.visualization.rendering as rendering
+
+
 
 # ------------------------------------
 # View
@@ -122,6 +126,38 @@ def main():
     #                                         front = view['trajectory'][0]['front'],
     #                                         lookat = view['trajectory'][0]['lookat'],
     #                                         up = view['trajectory'][0]['up'])
+   
+
+    # Visualization throuh Application 
+    app = gui.Application.instance
+    app.initialize()
+
+    w = app.create_window("Detected Objects", 1020, 800)
+    widget3d = gui.SceneWidget()
+    widget3d.scene = rendering.Open3DScene(w.renderer)
+    widget3d.scene.set_background([1,1,1,1])
+    material = rendering.MaterialRecord()
+    material.shader = "defaultUnlit"
+    material.point_size = 2 * w.scaling
+
+    
+
+    for entity_idx, entity in enumerate(p.objects_to_draw):
+        widget3d.scene.add_geometry("Entity" + str(entity_idx),entity, material)
+        for obj in p.objects_properties:
+            l = widget3d.add_3d_label(obj['center']+(-0.1,0,((obj['height']/2)+0.05)), 'Object: ' + str(obj['idx']))
+            l2 = widget3d.add_3d_label(obj['center']+(-0.1,0,((obj['height']/2)+0.08)), 'Aprox. Volume: ' + str(round(obj['x_width']*1000,0)) + 
+                                       ' x ' + str(round(obj['y_width']*1000,0)) + ' x ' + str(round(obj['height']*1000,0)) + 'mm' )
+
+            # l.color = gui.Color(p.objects_to_draw.colors[idx][0], p.objects_to_draw.colors[idx][1],
+            #                     p.objects_to_draw.colors[idx][2])
+            # l.scale = np.random.uniform(0.5, 3.0)
+    bbox = widget3d.scene.bounding_box
+    widget3d.setup_camera(60.0, bbox, bbox.get_center())
+    w.add_child(widget3d)
+    app.run()
+
+
 
     
     # --------------------------------------

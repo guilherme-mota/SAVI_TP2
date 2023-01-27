@@ -53,7 +53,6 @@ class PointCloudProcessing():
         self.originalpcd = o3d.io.read_point_cloud(filepath)
         self.pcd = self.originalpcd
 
-        
     def downsample(self):
 
         # Pre Processing with Voxel downsampling
@@ -288,6 +287,11 @@ class PointCloudProcessing():
             y_width = max(y_coordinates) - min(y_coordinates)
             z_height = max(z_coordinates) - min(z_coordinates)
             
+           
+
+            d['x_width'] =  x_width
+            d['y_width'] = y_width
+            d['height'] = z_height
 
             # BBOX 
             np_points = np.ndarray((8,3), dtype=float)
@@ -322,7 +326,7 @@ class PointCloudProcessing():
 
       
             objects.append(d)
-
+            
 
         # Pass value to attributes of the class
         self.objects_properties = objects
