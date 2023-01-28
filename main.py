@@ -45,6 +45,14 @@ view = {
 	"version_minor" : 0
 }
 
+def matrix_to_rtvec(matrix):
+
+    "Convert 4x4 matrix to rotation vector and translation vector"
+    (rvec, jac) = cv2.Rodrigues(matrix[:3, :3])
+    tvec = matrix[:3, 3]
+
+    return rvec, tvec
+
 def main():
 
 
@@ -181,25 +189,51 @@ def main():
     # print('Translation: ' + str(translation) + '\n')
 
     # Print Center position of each object
-    # for obj in p.objects_properties:
-    #     print('object center: ' + str(obj['center']) + ' - ' + str(type(obj['center'])) + '\n')
+    objs_center = np.empty([len(p.objects_properties), 3], dtype=np.float32)
+    for idx,obj in enumerate(p.objects_properties):
+        objs_center[idx,:]= np.float32(obj['center'])
 
-    #     center = np.float32(obj['center'])
-    #     print(str(center) + '\n')
+    print(str(objs_center) + '\n')
 
-    center = np.float32([[-0.29713339, -0.079794, 0.14211854], [0.2091177, -0.31141252, 0.0981142]])
+    # center = np.float32([[-0.30346738, -0.07012698,  0.13853716], [0.19971091, -0.30144798,  0.098008], [0.18992906, 0.29520129, 0.04333968], [-0.15614392 , 0.26796429 , 0.01928802]])
 
     # Show Scene image
     img = cv2.imread("docs/rgbd-scenes-v2_imgs/00404-color.png")
     height,width,_ = img.shape
     print('Height: ' + str(height) + ', Width: ' + str(width) + '\n')
 
-    rvec = cv2.Rodrigues(rotation)
+    # rvec = cv2.Rodrigues(rotation)
     # print('rvec: ' + str(rvec[0]) + ' - ' + str(type(rvec[0])) + '\n')
     distCoeffs = np.float32([0, 0, 0, 0])
+    
+    T_world_cam = np.eye(4)
+    T_world_cam[:3, :3] = rotation
+    T_world_cam[:3, 3] = translation.squeeze()
 
-    imagePoints,_ = cv2.projectPoints(center, rvec[0], translation, intrinsic_matrix, distCoeffs)
+    print('T_world_cam: ' + str(T_world_cam) + '\n')
+
+    T_world_obj = np.eye(4)
+    T_world_obj[:3,3] = np.array([tx, ty, tz]).squeeze()
+    euler = np.array([-108, 0, -37])
+    r1 = R.from_euler('zyx', [-108, 0, -37], degrees=True)
+    rot = r1.as_matrix()
+    T_world_obj[:3, :3] = rot
+
+    print('T_world_obj: ' + str(T_world_obj) + '\n')
+
+    T_cam_obj = np.linalg.inv(T_world_cam) * T_world_obj
+
+    print('T_cam_obj: ' + str(T_cam_obj) + '\n')
+
+    rvec, tvec = matrix_to_rtvec(T_cam_obj)
+    print(str(rvec) + '\n' + str(tvec) + '\n')
+
+    imagePoints,_ = cv2.projectPoints(objs_center, rvec, tvec, intrinsic_matrix, distCoeffs)
     print('Image Points: ' + str(imagePoints) + '\n')
+
+    for line,point in enumerate(imagePoints):
+        if point[0,0] > 0 and point[0,1] > 0:
+            img = cv2.circle(img, (int(point[0,0]), int(point[0,1])), radius=0, color=(0, 0, 255), thickness=7)
 
     cv2.imshow("Display window", img)
 
