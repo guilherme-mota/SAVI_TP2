@@ -19,6 +19,7 @@ from scipy.spatial.transform import Rotation as R
 from pcd_processing import PointCloudProcessing
 import open3d.visualization.gui as gui
 import open3d.visualization.rendering as rendering
+from scenes_information import Scenes
 
 
 
@@ -54,8 +55,7 @@ def matrix_to_rtvec(matrix):
     return rvec, tvec
 
 def main():
-
-
+    
     # ------------------------------------
     # Initialization 
     # ------------------------------------
@@ -83,6 +83,44 @@ def main():
     p.frametransform(0, 0, 0, tx, ty, tz)
     p.frametransform(-108, 0, 0, 0, 0, 0)
     p.frametransform(0, 0, -37, 0, 0, 0)
+
+    # Transformação do referêncial Global para o referêncial da Mesa
+    # -----------------------------------------------
+    trans = np.eye(4)
+    trans[:3,3] = np.array([tx, ty, tz]).squeeze() # Converter para matrix
+    print('trans:' + str(trans) + '\n')
+
+    rot1 = np.eye(4)
+    r1 = R.from_euler('xyz', [-108, 0, 0], degrees=True)
+    rot1[:3, :3] = r1.as_matrix()
+    print('rot1:' + str(rot1) + '\n')
+
+    rot2 = np.eye(4)
+    r2 = R.from_euler('xyz', [0, 0, -37], degrees=True)
+    rot2[:3, :3] = r2.as_matrix()
+    print('rot2:' + str(rot2) + '\n')
+    # exit(0)
+    # -----------------------------------------------
+
+    # Transformação do referêncial Mesa para o referêncial Global
+    # -----------------------------------------------
+    trans_inv = np.eye(4)
+    trans_inv[:3,3] = np.array([-tx, -ty, -tz]).squeeze() # Converter para matrix
+    print('trans_inv:' + str(trans) + '\n')
+
+    rot1_inv = np.eye(4)
+    r1 = R.from_euler('xyz', [108, 0, 0], degrees=True)
+    rot1_inv[:3, :3] = r1.as_matrix()
+    print('rot1_inv:' + str(rot1) + '\n')
+    print(str(np.linalg.inv(rot1)) + '\n')
+
+    rot2_inv = np.eye(4)
+    r2 = R.from_euler('xyz', [0, 0, 37], degrees=True)
+    rot2_inv[:3, :3] = r2.as_matrix()
+    print('rot2_inv:' + str(rot2) + '\n')
+    
+    # exit(0)
+    # -----------------------------------------------
     
     # Isolation of interest part (table + objects)
     p.croppcd(-0.6, -0.6, -0.02, 0.6, 0.6, 0.4)
@@ -173,19 +211,19 @@ def main():
     # --------------------------------------
     print('\n')
 
+    scene = Scenes(3)
+
     # Intrinsic Matrix
     intrinsic_matrix = np.float32([[570.3,      0, 320],
                                    [    0,  570.3, 240],
                                    [    0,      0,   1]])
-    # print('Camera Intrinsic Matrix: ' + str(intrinsic_matrix) + '\n')
 
-    # 0.92118 0.00982951 -0.355027 -0.15905 1.96118 -0.200736 0.341896
     # Convert quaternion to rotation matrix
-    r = R.from_quat([0.92118, 0.00982951, -0.355027, -0.15905])
+    r = R.from_quat(scene.information['rot'])
     rotation = r.as_matrix()
     # print('Rotation: ' + str(rotation) + '\n')
 
-    translation = np.float32([1.96118, -0.200736, 0.341896])
+    translation = np.float32(scene.information['trans'])
     # print('Translation: ' + str(translation) + '\n')
 
     # Print Center position of each object
@@ -193,12 +231,12 @@ def main():
     for idx,obj in enumerate(p.objects_properties):
         objs_center[idx,:]= np.float32(obj['center'])
 
-    print(str(objs_center) + '\n')
+    print('Centros dos objectos detectados:\n' + str(objs_center) + '\n')
 
-    # center = np.float32([[-0.30346738, -0.07012698,  0.13853716], [0.19971091, -0.30144798,  0.098008], [0.18992906, 0.29520129, 0.04333968], [-0.15614392 , 0.26796429 , 0.01928802]])
+    print('tx: ' + str(tx) + ' ty: ' + str(ty) + ' tz: '+ str(tz) + '\n')
 
     # Show Scene image
-    img = cv2.imread("docs/rgbd-scenes-v2_imgs/00404-color.png")
+    img = cv2.imread(scene.information['img'])
     height,width,_ = img.shape
     print('Height: ' + str(height) + ', Width: ' + str(width) + '\n')
 
@@ -214,21 +252,57 @@ def main():
 
     T_world_obj = np.eye(4)
     T_world_obj[:3,3] = np.array([tx, ty, tz]).squeeze()
-    euler = np.array([-108, 0, -37])
-    r1 = R.from_euler('zyx', [-108, 0, -37], degrees=True)
+    r1 = R.from_euler('xyz', [-108, 0, -37], degrees=True)
     rot = r1.as_matrix()
     T_world_obj[:3, :3] = rot
-
+    T_world_obj = np.asmatrix(T_world_obj)
     print('T_world_obj: ' + str(T_world_obj) + '\n')
+    # exit(0)
+
+    # Transformação inversa da mesa
+    T_mesa_world = np.eye(4)
+    T_mesa_world[:3,3] = np.array([-tx, -ty, -tz]).squeeze()
+    r1 = R.from_euler('zyx', [108, 0, 37], degrees=True)
+    rot = r1.as_matrix()
+    T_mesa_world[:3, :3] = rot
+    T_mesa_world = np.asmatrix(T_mesa_world)
+    print('T_mesa_world: ' + str(T_mesa_world) + '\n')
+    # exit(0)
+
+
+    T_obj_world = np.linalg.inv(T_world_obj)
+    print('T_obj_world: ' + str(T_obj_world) + '\n')
+
+    conf = T_obj_world * T_world_obj
+    print(str(conf))
+    # exit(0)
+
+    t = np.empty([4, 1], dtype=np.float32)
+    t[0,0] = objs_center[0,0]
+    t[1,0] = objs_center[0,1]
+    t[2,0] = objs_center[0,2]
+    t[3,0] = 1
+    t = np.asmatrix(t)
+    print('t: ' + str(t) + '\n')    
+
+    New_center = rot2_inv * t
+    New_center = rot1_inv * New_center
+    New_center = trans_inv * New_center
+    # print(str(New_center) + '\n')
+
+    new2 = np.float32([New_center[0],New_center[1],New_center[2]])
+    print(str(new2) + '\n')
+
+    # print('T_world_obj: ' + str(T_world_obj) + '\n')
 
     T_cam_obj = np.linalg.inv(T_world_cam) * T_world_obj
 
-    print('T_cam_obj: ' + str(T_cam_obj) + '\n')
+    # print('T_cam_obj: ' + str(T_cam_obj) + '\n')
 
-    rvec, tvec = matrix_to_rtvec(T_cam_obj)
+    rvec, tvec = matrix_to_rtvec(T_world_cam)  # T_cam_obj
     print(str(rvec) + '\n' + str(tvec) + '\n')
 
-    imagePoints,_ = cv2.projectPoints(objs_center, rvec, tvec, intrinsic_matrix, distCoeffs)
+    imagePoints,_ = cv2.projectPoints(new2, rvec, tvec, intrinsic_matrix, distCoeffs)
     print('Image Points: ' + str(imagePoints) + '\n')
 
     for line,point in enumerate(imagePoints):
