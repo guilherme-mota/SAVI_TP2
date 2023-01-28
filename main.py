@@ -129,33 +129,33 @@ def main():
    
 
     # Visualization throuh Application 
-    app = gui.Application.instance
-    app.initialize()
+    # app = gui.Application.instance
+    # app.initialize()
 
-    w = app.create_window("Detected Objects", 1020, 800)
-    widget3d = gui.SceneWidget()
-    widget3d.scene = rendering.Open3DScene(w.renderer)
-    widget3d.scene.set_background([1,1,1,1])
-    material = rendering.MaterialRecord()
-    material.shader = "defaultUnlit"
-    material.point_size = 2 * w.scaling
+    # w = app.create_window("Detected Objects", 1020, 800)
+    # widget3d = gui.SceneWidget()
+    # widget3d.scene = rendering.Open3DScene(w.renderer)
+    # widget3d.scene.set_background([1,1,1,1])
+    # material = rendering.MaterialRecord()
+    # material.shader = "defaultUnlit"
+    # material.point_size = 2 * w.scaling
 
     
 
-    for entity_idx, entity in enumerate(p.objects_to_draw):
-        widget3d.scene.add_geometry("Entity" + str(entity_idx),entity, material)
-        for obj in p.objects_properties:
-            l = widget3d.add_3d_label(obj['center']+(-0.1,0,((obj['height']/2)+0.05)), 'Object: ' + str(obj['idx']))
-            l2 = widget3d.add_3d_label(obj['center']+(-0.1,0,((obj['height']/2)+0.08)), 'Aprox. Volume: ' + str(round(obj['x_width']*1000,0)) + 
-                                       ' x ' + str(round(obj['y_width']*1000,0)) + ' x ' + str(round(obj['height']*1000,0)) + 'mm' )
+    # for entity_idx, entity in enumerate(p.objects_to_draw):
+    #     widget3d.scene.add_geometry("Entity" + str(entity_idx),entity, material)
+    #     for obj in p.objects_properties:
+    #         l = widget3d.add_3d_label(obj['center']+(-0.1,0,((obj['height']/2)+0.05)), 'Object: ' + str(obj['idx']))
+    #         l2 = widget3d.add_3d_label(obj['center']+(-0.1,0,((obj['height']/2)+0.08)), 'Aprox. Volume: ' + str(round(obj['x_width']*1000,0)) + 
+    #                                    ' x ' + str(round(obj['y_width']*1000,0)) + ' x ' + str(round(obj['height']*1000,0)) + 'mm' )
 
-            # l.color = gui.Color(p.objects_to_draw.colors[idx][0], p.objects_to_draw.colors[idx][1],
-            #                     p.objects_to_draw.colors[idx][2])
-            # l.scale = np.random.uniform(0.5, 3.0)
-    bbox = widget3d.scene.bounding_box
-    widget3d.setup_camera(60.0, bbox, bbox.get_center())
-    w.add_child(widget3d)
-    app.run()
+    #         # l.color = gui.Color(p.objects_to_draw.colors[idx][0], p.objects_to_draw.colors[idx][1],
+    #         #                     p.objects_to_draw.colors[idx][2])
+    #         # l.scale = np.random.uniform(0.5, 3.0)
+    # bbox = widget3d.scene.bounding_box
+    # widget3d.setup_camera(60.0, bbox, bbox.get_center())
+    # w.add_child(widget3d)
+    # app.run()
 
 
 
@@ -166,44 +166,40 @@ def main():
     print('\n')
 
     # Intrinsic Matrix
-    intrinsic_matrix = np.matrix([[570.3,      0, 0, 320],
-                                  [    0,  570.3, 0, 240],
-                                  [    0,      0, 1,   0],
-                                  [    0,      0, 0,   1]], copy=False,  dtype=np.float64)
-    print('Camera Intrinsic Matrix: ' + str(intrinsic_matrix) + '\n')
+    intrinsic_matrix = np.float32([[570.3,      0, 320],
+                                   [    0,  570.3, 240],
+                                   [    0,      0,   1]])
+    # print('Camera Intrinsic Matrix: ' + str(intrinsic_matrix) + '\n')
 
     # 0.92118 0.00982951 -0.355027 -0.15905 1.96118 -0.200736 0.341896
     # Convert quaternion to rotation matrix
     r = R.from_quat([0.92118, 0.00982951, -0.355027, -0.15905])
     rotation = r.as_matrix()
-    print('Rotation: ' + str(rotation) + '\n')
+    # print('Rotation: ' + str(rotation) + '\n')
 
-    translation = np.array([1.96118, -0.200736, 0.341896], dtype = np.float64)
-    print('Translation: ' + str(translation) + '\n')
+    translation = np.float32([1.96118, -0.200736, 0.341896])
+    # print('Translation: ' + str(translation) + '\n')
 
-    # Print Ccnter position of each object
-    center = np.asmatrix(np.zeros((4,1)))
-    for obj in p.objects_properties:
-        print('object center: ' + str(obj['center']) + ' - ' + str(type(obj['center'])) + '\n')
+    # Print Center position of each object
+    # for obj in p.objects_properties:
+    #     print('object center: ' + str(obj['center']) + ' - ' + str(type(obj['center'])) + '\n')
 
-        # Conversão para matriz e homegenização
-        center[0:3,0] = np.asmatrix(obj['center']).T
-        center[3,0]= 1
-        print(str(center) + '\n')
+    #     center = np.float32(obj['center'])
+    #     print(str(center) + '\n')
+
+    center = np.float32([[-0.29713339, -0.079794, 0.14211854], [0.2091177, -0.31141252, 0.0981142]])
 
     # Show Scene image
     img = cv2.imread("docs/rgbd-scenes-v2_imgs/00404-color.png")
+    height,width,_ = img.shape
+    print('Height: ' + str(height) + ', Width: ' + str(width) + '\n')
 
     rvec = cv2.Rodrigues(rotation)
-    print('rvec: ' + str(rvec) + ' - ' + str(type(rvec)) + '\n')
-    distCoeffs = np.array([0, 0, 0, 0], dtype=np.float64)
+    # print('rvec: ' + str(rvec[0]) + ' - ' + str(type(rvec[0])) + '\n')
+    distCoeffs = np.float32([0, 0, 0, 0])
 
-    # imagePoints,_ = cv2.projectPoints(np.array(center), rvec[0], translation, intrinsic_matrix, distCoeffs)
-    # print('Image Points: ' + str(imagePoints) + '\n')
-
-    coords = np.array([[4.27874, 115.15968, 18.1621], [27.52924, 113.3441, 17.70207]])
-    cop = np.array([-14.45194, 34.59882, 19.11343])
-    points_2d = cv2.projectPoints(np.array(coords), (0,0,0), (0,0,0), intrinsic_matrix, distCoeffs)
+    imagePoints,_ = cv2.projectPoints(center, rvec[0], translation, intrinsic_matrix, distCoeffs)
+    print('Image Points: ' + str(imagePoints) + '\n')
 
     cv2.imshow("Display window", img)
 
