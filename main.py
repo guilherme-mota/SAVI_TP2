@@ -164,7 +164,7 @@ def main():
     print("2) After picking points, press 'Q' to close the window")
     vis = o3d.visualization.VisualizerWithEditing()
     vis.create_window()
-    vis.add_geometry(p.outlier_cloud)
+    vis.add_geometry(p.originalpcd)
     vis.run()  # user picks points
     vis.destroy_window()
     print("")
@@ -222,8 +222,9 @@ def main():
     scene = Scenes(3)
 
     # Intrinsic Matrix
-    intrinsic_matrix = np.float32([[570.3,      0, 320],
-                                   [    0,  570.3, 240],
+    alhpa = 0.5703
+    intrinsic_matrix = np.float32([[alhpa,      0, 320],
+                                   [    0,  alhpa, 240],
                                    [    0,      0,   1]])
 
     # Convert quaternion to rotation matrix
