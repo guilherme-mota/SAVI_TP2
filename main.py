@@ -84,41 +84,30 @@ def main():
     p.frametransform(-108, 0, 0, 0, 0, 0)
     p.frametransform(0, 0, -37, 0, 0, 0)
 
-    # Transformação do referêncial Global para o referêncial da Mesa
-    # -----------------------------------------------
+    # --------------------------------------------------------------------------
+    # Transformação do referêncial da camara (Global) para o referêncial da Mesa
+    # --------------------------------------------------------------------------
     trans = np.eye(4)
-    trans[:3,3] = np.array([tx, ty, tz]).squeeze() # Converter para matrix
-    print('trans:' + str(trans) + '\n')
+    trans[:3,3] = np.array([-tx, -ty, -tz]).transpose() # Converter para matrix
+    trans = np.asmatrix(trans)
+    # print('trans:\n' + str(trans) + '\n')
 
     rot1 = np.eye(4)
-    r1 = R.from_euler('xyz', [-108, 0, 0], degrees=True)
+    r1 = R.from_euler('xyz', [108, 0, 0], degrees=True)
     rot1[:3, :3] = r1.as_matrix()
-    print('rot1:' + str(rot1) + '\n')
+    # print('rot1:\n' + str(rot1) + '\n')
 
     rot2 = np.eye(4)
-    r2 = R.from_euler('xyz', [0, 0, -37], degrees=True)
-    rot2[:3, :3] = r2.as_matrix()
-    print('rot2:' + str(rot2) + '\n')
-    # exit(0)
-    # -----------------------------------------------
-
-    # Transformação do referêncial Mesa para o referêncial Global
-    # -----------------------------------------------
-    trans_inv = np.eye(4)
-    trans_inv[:3,3] = np.array([-tx, -ty, -tz]).squeeze() # Converter para matrix
-    print('trans_inv:' + str(trans) + '\n')
-
-    rot1_inv = np.eye(4)
-    r1 = R.from_euler('xyz', [108, 0, 0], degrees=True)
-    rot1_inv[:3, :3] = r1.as_matrix()
-    print('rot1_inv:' + str(rot1) + '\n')
-    print(str(np.linalg.inv(rot1)) + '\n')
-
-    rot2_inv = np.eye(4)
     r2 = R.from_euler('xyz', [0, 0, 37], degrees=True)
-    rot2_inv[:3, :3] = r2.as_matrix()
-    print('rot2_inv:' + str(rot2) + '\n')
-    
+    rot2[:3, :3] = r2.as_matrix()
+    # print('rot2:\n' + str(rot2) + '\n')
+
+    T_cam_mesa = np.eye(4)
+    T_cam_mesa = rot1 * rot2 * T_cam_mesa   # rotação de -108 em torno de x
+    # T_cam_mesa = rot2 * T_cam_mesa   # rotação de -37 em torno de z
+    T_cam_mesa = trans * T_cam_mesa  # translação tx, ty, tz
+    # print('T_cam_mesa:\n' + str(T_cam_mesa) + '\n')
+
     # exit(0)
     # -----------------------------------------------
     
@@ -206,9 +195,9 @@ def main():
 
 
     
-    # --------------------------------------
+    # ----------------------------------------------------------------------------
     # Classification of objects in the scene
-    # --------------------------------------
+    # ----------------------------------------------------------------------------
     print('\n')
 
     scene = Scenes(3)
@@ -230,15 +219,29 @@ def main():
     objs_center = np.empty([len(p.objects_properties), 3], dtype=np.float32)
     for idx,obj in enumerate(p.objects_properties):
         objs_center[idx,:]= np.float32(obj['center'])
+    print('Centros dos objectos detectados visto do referêncial da mesa:\n' + str(objs_center) + '\n')
 
-    print('Centros dos objectos detectados:\n' + str(objs_center) + '\n')
+    new_objs_center = np.empty([len(p.objects_properties), 3], dtype=np.float32)
+    for idx,obj_center in enumerate(objs_center):
+        t = np.empty([4, 1], dtype=np.float32)
+        t[0,0] = obj_center[0]
+        t[1,0] = obj_center[1]
+        t[2,0] = obj_center[2]
+        t[3,0] = 1
+        t = np.asmatrix(t)
 
-    print('tx: ' + str(tx) + ' ty: ' + str(ty) + ' tz: '+ str(tz) + '\n')
+        New_center = T_cam_mesa * t
+        New_center = np.asarray(New_center)
+        new2 = New_center.transpose()
+
+        new_objs_center[idx,:] = new2[:,:3]
+
+    print('Centros dos objectos detectados visto do referêncial da camara:\n' + str(new_objs_center) + '\n')
 
     # Show Scene image
     img = cv2.imread(scene.information['img'])
     height,width,_ = img.shape
-    print('Height: ' + str(height) + ', Width: ' + str(width) + '\n')
+    # print('Height: ' + str(height) + ', Width: ' + str(width) + '\n')
 
     # rvec = cv2.Rodrigues(rotation)
     # print('rvec: ' + str(rvec[0]) + ' - ' + str(type(rvec[0])) + '\n')
@@ -246,68 +249,38 @@ def main():
     
     T_world_cam = np.eye(4)
     T_world_cam[:3, :3] = rotation
-    T_world_cam[:3, 3] = translation.squeeze()
+    T_world_cam[:3, 3] = translation.transpose()
 
-    print('T_world_cam: ' + str(T_world_cam) + '\n')
+    # print('T_world_cam: ' + str(T_world_cam) + '\n')
 
     T_world_obj = np.eye(4)
-    T_world_obj[:3,3] = np.array([tx, ty, tz]).squeeze()
+    T_world_obj[:3,3] = np.array([tx, ty, tz]).transpose()
     r1 = R.from_euler('xyz', [-108, 0, -37], degrees=True)
     rot = r1.as_matrix()
     T_world_obj[:3, :3] = rot
     T_world_obj = np.asmatrix(T_world_obj)
-    print('T_world_obj: ' + str(T_world_obj) + '\n')
+    # print('T_world_obj: ' + str(T_world_obj) + '\n')
     # exit(0)
 
     # Transformação inversa da mesa
     T_mesa_world = np.eye(4)
-    T_mesa_world[:3,3] = np.array([-tx, -ty, -tz]).squeeze()
+    T_mesa_world[:3,3] = np.array([-tx, -ty, -tz]).transpose()
     r1 = R.from_euler('zyx', [108, 0, 37], degrees=True)
     rot = r1.as_matrix()
     T_mesa_world[:3, :3] = rot
     T_mesa_world = np.asmatrix(T_mesa_world)
-    print('T_mesa_world: ' + str(T_mesa_world) + '\n')
+    # print('T_mesa_world: ' + str(T_mesa_world) + '\n')
     # exit(0)
-
-
-    T_obj_world = np.linalg.inv(T_world_obj)
-    print('T_obj_world: ' + str(T_obj_world) + '\n')
-
-    conf = T_obj_world * T_world_obj
-    print(str(conf))
-    # exit(0)
-
-    t = np.empty([4, 1], dtype=np.float32)
-    t[0,0] = objs_center[0,0]
-    t[1,0] = objs_center[0,1]
-    t[2,0] = objs_center[0,2]
-    t[3,0] = 1
-    t = np.asmatrix(t)
-    print('t: ' + str(t) + '\n')    
-
-    New_center = rot2_inv * t
-    New_center = rot1_inv * New_center
-    New_center = trans_inv * New_center
-    # print(str(New_center) + '\n')
-
-    new2 = np.float32([New_center[0],New_center[1],New_center[2]])
-    print(str(new2) + '\n')
-
-    # print('T_world_obj: ' + str(T_world_obj) + '\n')
-
-    T_cam_obj = np.linalg.inv(T_world_cam) * T_world_obj
-
-    # print('T_cam_obj: ' + str(T_cam_obj) + '\n')
 
     rvec, tvec = matrix_to_rtvec(T_world_cam)  # T_cam_obj
-    print(str(rvec) + '\n' + str(tvec) + '\n')
+    # print(str(rvec) + '\n' + str(tvec) + '\n')
 
-    imagePoints,_ = cv2.projectPoints(new2, rvec, tvec, intrinsic_matrix, distCoeffs)
-    print('Image Points: ' + str(imagePoints) + '\n')
+    imagePoints,_ = cv2.projectPoints(new_objs_center, rvec, tvec, intrinsic_matrix, distCoeffs)
+    print('Image Points:\n' + str(imagePoints) + '\n')
 
-    for line,point in enumerate(imagePoints):
+    for point in imagePoints:
         if point[0,0] > 0 and point[0,1] > 0:
-            img = cv2.circle(img, (int(point[0,0]), int(point[0,1])), radius=0, color=(0, 0, 255), thickness=7)
+            img = cv2.circle(img, (int(point[0,1]), int(point[0,0])), radius=0, color=(0, 0, 255), thickness=7)
 
     cv2.imshow("Display window", img)
 
