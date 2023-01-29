@@ -95,17 +95,26 @@ def main():
     rot1 = np.eye(4)
     r1 = R.from_euler('xyz', [108, 0, 0], degrees=True)
     rot1[:3, :3] = r1.as_matrix()
+    rot1 = np.asmatrix(rot1)
     # print('rot1:\n' + str(rot1) + '\n')
+    # print('rot1 type:\n' + str(type(rot1)) + '\n')
 
     rot2 = np.eye(4)
     r2 = R.from_euler('xyz', [0, 0, 37], degrees=True)
     rot2[:3, :3] = r2.as_matrix()
+    rot2 = np.asmatrix(rot2)
     # print('rot2:\n' + str(rot2) + '\n')
+    # print('rot2 type:\n' + str(type(rot2)) + '\n')
 
     T_cam_mesa = np.eye(4)
-    T_cam_mesa = rot1 * rot2 * T_cam_mesa   # rotação de -108 em torno de x
+    T_cam_mesa = rot1 * T_cam_mesa   # rotação de -108 em torno de x
+    T_cam_mesa = rot2 * T_cam_mesa
     T_cam_mesa = trans * T_cam_mesa  # translação tx, ty, tz
-    print('T_cam_mesa Matrix:\n' + str(T_cam_mesa) + '\n')
+    T_mesa_cam = np.linalg.inv(T_cam_mesa)
+    # print('T_cam_mesa Matrix:\n' + str(T_cam_mesa) + '\n')
+    # print('T_mesa_cam Matrix:\n' + str(T_mesa_cam) + '\n')
+
+    # print('Identaty Matrix:\n' + str((T_mesa_cam*T_cam_mesa).round()) + '\n')
 
     # exit(0)
     # -----------------------------------------------
@@ -221,7 +230,7 @@ def main():
     scene = Scenes(3)
 
     # Intrinsic Matrix
-    alhpa = 0.5703
+    alhpa = 570.3
     intrinsic_matrix = np.float32([[alhpa,      0, 320],
                                    [    0,  alhpa, 240],
                                    [    0,      0,   1]])
@@ -262,7 +271,7 @@ def main():
     img = cv2.imread(scene.information['img'])
     height,width,_ = img.shape
     print('Height: ' + str(height) + ', Width: ' + str(width) + '\n')
-
+    # exit(0)
     # rvec = cv2.Rodrigues(rotation)
     # print('rvec: ' + str(rvec[0]) + ' - ' + str(type(rvec[0])) + '\n')
     distCoeffs = np.float32([0, 0, 0, 0])
@@ -272,25 +281,6 @@ def main():
     T_world_cam[:3, 3] = translation.transpose()
 
     # print('T_world_cam: ' + str(T_world_cam) + '\n')
-
-    # T_world_obj = np.eye(4)
-    # T_world_obj[:3,3] = np.array([tx, ty, tz]).transpose()
-    # r1 = R.from_euler('xyz', [-108, 0, -37], degrees=True)
-    # rot = r1.as_matrix()
-    # T_world_obj[:3, :3] = rot
-    # T_world_obj = np.asmatrix(T_world_obj)
-    # print('T_world_obj: ' + str(T_world_obj) + '\n')
-    # exit(0)
-
-    # Transformação inversa da mesa
-    # T_mesa_world = np.eye(4)
-    # T_mesa_world[:3,3] = np.array([-tx, -ty, -tz]).transpose()
-    # r1 = R.from_euler('zyx', [108, 0, 37], degrees=True)
-    # rot = r1.as_matrix()
-    # T_mesa_world[:3, :3] = rot
-    # T_mesa_world = np.asmatrix(T_mesa_world)
-    # print('T_mesa_world: ' + str(T_mesa_world) + '\n')
-    # exit(0)
 
     rvec, tvec = matrix_to_rtvec(T_world_cam)  # T_cam_obj
     print('rvec:\n' + str(rvec) + '\n\n' + 'tvec:\n' + str(tvec) + '\n')
