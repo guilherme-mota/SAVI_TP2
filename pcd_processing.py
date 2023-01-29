@@ -326,7 +326,7 @@ class PointCloudProcessing():
 
       
             objects.append(d)
-            
+      
 
         # Pass value to attributes of the class
         self.objects_properties = objects
@@ -339,6 +339,7 @@ class PointCloudProcessing():
             self.objects_to_draw.append(object['points'])
             self.objects_to_draw.append(object['bbox'])
 
-
-
         
+              
+       
+            

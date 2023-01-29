@@ -156,12 +156,30 @@ def main():
     #                                         lookat = view['trajectory'][0]['lookat'],
     #                                         up = view['trajectory'][0]['up'])
 
+    print("")
+    print(
+        "1) Please pick at least three correspondences using [shift + left click]"
+    )
+    print("   Press [shift + right click] to undo point picking")
+    print("2) After picking points, press 'Q' to close the window")
+    vis = o3d.visualization.VisualizerWithEditing()
+    vis.create_window()
+    vis.add_geometry(p.outlier_cloud)
+    vis.run()  # user picks points
+    vis.destroy_window()
+    print("")
+
+
     # o3d.visualization.draw_geometries(p.objects_to_draw,
     #                                         zoom = view['trajectory'][0]['zoom'],
     #                                         front = view['trajectory'][0]['front'],
     #                                         lookat = view['trajectory'][0]['lookat'],
     #                                         up = view['trajectory'][0]['up'])
+ 
    
+
+   
+
 
     # Visualization throuh Application 
     # app = gui.Application.instance
@@ -192,7 +210,8 @@ def main():
     # w.add_child(widget3d)
     # app.run()
 
-
+    
+    
 
     
     # ----------------------------------------------------------------------------
