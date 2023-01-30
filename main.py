@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
+
 # -------------------------------------------------------------------------------
 # Name:        main
 # Purpose:     AI system to detect and track objects
 # Authors:     Guilherme Mota | Miguel Cruz | Luís Ascenção
 # Created:     29/12/2022
 # -------------------------------------------------------------------------------
+
 
 # ------------------------------------
 # Imports
@@ -16,12 +18,11 @@ import copy
 import argparse
 import numpy as np
 import open3d as o3d
-from scipy.spatial.transform import Rotation as R
-from pcd_processing import PointCloudProcessing
-import open3d.visualization.gui as gui
-import open3d.visualization.rendering as rendering
 from scenes_information import Scenes
-
+import open3d.visualization.gui as gui
+from pcd_processing import PointCloudProcessing
+from scipy.spatial.transform import Rotation as R
+import open3d.visualization.rendering as rendering
 
 
 # ------------------------------------
@@ -69,13 +70,11 @@ def main():
     # Init Scene
     scene = Scenes(args['scene'])
 
-    print('Starting Scene 3D Processing...\n')
-    
     # Load PCD
+    print('Starting Scene 3D Processing...\n')
     p = PointCloudProcessing()
     p.loadpcd(scene.information['pcd'])   
     
-
     
     # ------------------------------------------------------------------------
     # Execution 
@@ -98,33 +97,21 @@ def main():
     trans = np.eye(4)
     trans[:3,3] = np.array([-tx, -ty, -tz]).transpose() # Converter para matrix
     trans = np.asmatrix(trans)
-    # print('trans:\n' + str(trans) + '\n')
 
     rot1 = np.eye(4)
     r1 = R.from_euler('xyz', [108, 0, 0], degrees=True)
     rot1[:3, :3] = r1.as_matrix()
     rot1 = np.asmatrix(rot1)
-    # print('rot1:\n' + str(rot1) + '\n')
-    # print('rot1 type:\n' + str(type(rot1)) + '\n')
 
     rot2 = np.eye(4)
     r2 = R.from_euler('xyz', [0, 0, 37], degrees=True)
     rot2[:3, :3] = r2.as_matrix()
     rot2 = np.asmatrix(rot2)
-    # print('rot2:\n' + str(rot2) + '\n')
-    # print('rot2 type:\n' + str(type(rot2)) + '\n')
 
     T_cam_mesa = np.eye(4)
     T_cam_mesa = rot1 * T_cam_mesa   # rotação de -108 em torno de x
     T_cam_mesa = rot2 * T_cam_mesa
     T_cam_mesa = trans * T_cam_mesa  # translação tx, ty, tz
-    T_mesa_cam = np.linalg.inv(T_cam_mesa)
-    # print('T_cam_mesa Matrix:\n' + str(T_cam_mesa) + '\n')
-    # print('T_mesa_cam Matrix:\n' + str(T_mesa_cam) + '\n')
-
-    # print('Identaty Matrix:\n' + str((T_mesa_cam*T_cam_mesa).round()) + '\n')
-
-    # exit(0)
     # -----------------------------------------------
     
     # Isolation of interest part (table + objects)
@@ -173,9 +160,7 @@ def main():
     #                                         up = view['trajectory'][0]['up'])
 
     print("")
-    print(
-        "1) Please pick at least three correspondences using [shift + left click]"
-    )
+    print("1) Please pick at least three correspondences using [shift + left click]")
     print("   Press [shift + right click] to undo point picking")
     print("2) After picking points, press 'Q' to close the window")
     vis = o3d.visualization.VisualizerWithEditing()
@@ -185,17 +170,11 @@ def main():
     vis.destroy_window()
     print("")
 
-
     # o3d.visualization.draw_geometries(p.objects_to_draw,
     #                                         zoom = view['trajectory'][0]['zoom'],
     #                                         front = view['trajectory'][0]['front'],
     #                                         lookat = view['trajectory'][0]['lookat'],
     #                                         up = view['trajectory'][0]['up'])
- 
-   
-
-   
-
 
     # Visualization throuh Application 
     # app = gui.Application.instance
@@ -208,8 +187,6 @@ def main():
     # material = rendering.MaterialRecord()
     # material.shader = "defaultUnlit"
     # material.point_size = 2 * w.scaling
-
-    
 
     # for entity_idx, entity in enumerate(p.objects_to_draw):
     #     widget3d.scene.add_geometry("Entity" + str(entity_idx),entity, material)
@@ -226,31 +203,13 @@ def main():
     # w.add_child(widget3d)
     # app.run()
 
-    
-    
 
-    
     # ----------------------------------------------------------------------------
-    # Classification of objects in the scene
+    # Relation between 3D points and RGB images
     # ----------------------------------------------------------------------------
     print('\n')
 
-    # Intrinsic Matrix
-    alhpa = 570.3
-    intrinsic_matrix = np.float32([[alhpa,      0, 320],
-                                   [    0,  alhpa, 240],
-                                   [    0,      0,   1]])
-    print('Intrinsic Matrix:\n' + str(intrinsic_matrix) + '\n')
-
-    # Convert quaternion to rotation matrix
-    r = R.from_quat(scene.information['rot'])
-    rotation = r.as_matrix()
-    # print('Rotation: ' + str(rotation) + '\n')
-
-    translation = np.float32(scene.information['trans'])
-    # print('Translation: ' + str(translation) + '\n')
-
-    # Print Center position of each object
+    # Center position of each object --------------------------------------------
     objs_center = np.empty([len(p.objects_properties), 3], dtype=np.float32)
     for idx,obj in enumerate(p.objects_properties):
         objs_center[idx,:]= np.float32(obj['center'])
@@ -272,25 +231,41 @@ def main():
         new_objs_center[idx,:] = new2[:,:3]
 
     print('Centros dos objectos detectados visto do referêncial da camara:\n' + str(new_objs_center) + '\n')
+    # ------------------------------------------------------------------------
 
-    # Show Scene image
+    # Show Scene image -------------------------------------------------------
     img = cv2.imread(scene.information['img'])
     height,width,_ = img.shape
     print('Height: ' + str(height) + ', Width: ' + str(width) + '\n')
-    # exit(0)
-    # rvec = cv2.Rodrigues(rotation)
-    # print('rvec: ' + str(rvec[0]) + ' - ' + str(type(rvec[0])) + '\n')
-    distCoeffs = np.float32([0, 0, 0, 0])
-    print('distCoeffs:\n' + str(distCoeffs) + '\n')
+    # ------------------------------------------------------------------------
+
+    # Convert quaternion to rotation matrix ----------------------------------
+    r = R.from_quat(scene.information['rot'])
+    rotation = r.as_matrix()
+    # print('Rotation: ' + str(rotation) + '\n')
+
+    translation = np.float32(scene.information['trans'])
+    # print('Translation: ' + str(translation) + '\n')
     
     T_world_cam = np.eye(4)
     T_world_cam[:3, :3] = rotation
     T_world_cam[:3, 3] = translation.transpose()
-
     # print('T_world_cam: ' + str(T_world_cam) + '\n')
-
     rvec, tvec = matrix_to_rtvec(T_world_cam)  # T_cam_obj
     print('rvec:\n' + str(rvec) + '\n\n' + 'tvec:\n' + str(tvec) + '\n')
+    # ------------------------------------------------------------------------
+
+    # Intrinsic Matrix -------------------------------------------------------
+    alhpa = 570.3
+    intrinsic_matrix = np.float32([[alhpa,      0, 320],
+                                   [    0,  alhpa, 240],
+                                   [    0,      0,   1]])
+    print('Intrinsic Matrix:\n' + str(intrinsic_matrix) + '\n')
+    # ------------------------------------------------------------------------
+
+    distCoeffs = np.float32([0, 0, 0, 0])
+    print('distCoeffs:\n' + str(distCoeffs) + '\n')
+    # ------------------------------------------------------------------------
 
     imagePoints,_ = cv2.projectPoints(new_objs_center, rvec, tvec, intrinsic_matrix, distCoeffs)
     print('Image Points:\n' + str(imagePoints) + '\n')
@@ -305,6 +280,10 @@ def main():
 
     if k == ord("s"):
         cv2.destroyAllWindows()
+
+    # ----------------------------------------------------------------------------
+    # Classification of objects in the scene
+    # ----------------------------------------------------------------------------
 
 
 if __name__ == "__main__":
