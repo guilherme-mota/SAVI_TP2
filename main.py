@@ -13,6 +13,7 @@
 import os
 import cv2
 import copy
+import argparse
 import numpy as np
 import open3d as o3d
 from scipy.spatial.transform import Rotation as R
@@ -56,22 +57,29 @@ def matrix_to_rtvec(matrix):
 
 def main():
     
-    # ------------------------------------
+    # ------------------------------------------------------------------------
     # Initialization 
-    # ------------------------------------
+    # ------------------------------------------------------------------------
+
+    # Initialize parser
+    parser = argparse.ArgumentParser(description="Point Cloud Scene")
+    parser.add_argument("-s", "--scene", nargs='?', const=1, type=int, help="Scene selection", default=1)
+    args = vars(parser.parse_args())
+    
+    # Init Scene
+    scene = Scenes(args['scene'])
 
     print('Starting Scene 3D Processing...\n')
     
     # Load PCD
     p = PointCloudProcessing()
-    # /home/miguel/Documents/SAVI_TP2/docs/rgbd-scenes-v2_pc/rgbd-scenes-v2/pc/01.ply
-    p.loadpcd('docs/rgbd-scenes-v2_pc/rgbd-scenes-v2/pc/05.pcd')   
+    p.loadpcd(scene.information['pcd'])   
     
 
     
-    # ------------------------------------
+    # ------------------------------------------------------------------------
     # Execution 
-    # ------------------------------------
+    # ------------------------------------------------------------------------
 
     # Pre Processing with Voxel downsampling to increase process velocity
     p.downsample()
@@ -131,9 +139,9 @@ def main():
     # Object isolation and caracterization
 
     
-    # ------------------------------------
+    # ------------------------------------------------------------------------
     # Visualization
-    # ------------------------------------
+    # ------------------------------------------------------------------------
 
     #Draw BBox
     entities_to_draw = []
@@ -227,8 +235,6 @@ def main():
     # ----------------------------------------------------------------------------
     print('\n')
 
-    scene = Scenes(3)
-
     # Intrinsic Matrix
     alhpa = 570.3
     intrinsic_matrix = np.float32([[alhpa,      0, 320],
@@ -275,6 +281,7 @@ def main():
     # rvec = cv2.Rodrigues(rotation)
     # print('rvec: ' + str(rvec[0]) + ' - ' + str(type(rvec[0])) + '\n')
     distCoeffs = np.float32([0, 0, 0, 0])
+    print('distCoeffs:\n' + str(distCoeffs) + '\n')
     
     T_world_cam = np.eye(4)
     T_world_cam[:3, :3] = rotation
@@ -290,7 +297,7 @@ def main():
 
     for point in imagePoints:
         if point[0,0] > 0 and point[0,1] > 0:
-            img = cv2.circle(img, (int(point[0,1]), int(point[0,0])), radius=0, color=(0, 0, 255), thickness=7)
+            img = cv2.circle(img, (int(point[0,0]), int(point[0,1])), radius=0, color=(0, 0, 255), thickness=7)
 
     cv2.imshow("Display window", img)
 
