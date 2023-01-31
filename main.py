@@ -12,12 +12,16 @@
 # ------------------------------------
 # Imports
 # ------------------------------------
+import glob
 import os
 import cv2
 import copy
+import torch
 import argparse
 import numpy as np
 import open3d as o3d
+from Classifier.dataset import Dataset
+from classifier import Classifier
 from scenes_information import Scenes
 import open3d.visualization.gui as gui
 from pcd_processing import PointCloudProcessing
@@ -55,6 +59,9 @@ def matrix_to_rtvec(matrix):
     tvec = matrix[:3, 3]
 
     return rvec, tvec
+
+def extractSmallImage(image_full, x1, y1, x2, y2):
+    return image_full[y1:y2, x1:x2]
 
 def main():
     
@@ -213,7 +220,7 @@ def main():
     objs_center = np.empty([len(p.objects_properties), 3], dtype=np.float32)
     for idx,obj in enumerate(p.objects_properties):
         objs_center[idx,:]= np.float32(obj['center'])
-    print('Centros dos objectos detectados visto do referêncial da mesa:\n' + str(objs_center) + '\n')
+    # print('Centros dos objectos detectados visto do referêncial da mesa:\n' + str(objs_center) + '\n')
 
     new_objs_center = np.empty([len(p.objects_properties), 3], dtype=np.float32)
     for idx,obj_center in enumerate(objs_center):
@@ -234,9 +241,10 @@ def main():
     # ------------------------------------------------------------------------
 
     # Show Scene image -------------------------------------------------------
-    img = cv2.imread(scene.information['img'])
-    height,width,_ = img.shape
-    print('Height: ' + str(height) + ', Width: ' + str(width) + '\n')
+    img_original = cv2.imread(scene.information['img'])
+    img_gui = copy.deepcopy(img_original)
+    # height,width,_ = img_original.shape
+    # print('Height: ' + str(height) + ', Width: ' + str(width) + '\n')
     # ------------------------------------------------------------------------
 
     # Convert quaternion to rotation matrix ----------------------------------
@@ -252,7 +260,7 @@ def main():
     T_world_cam[:3, 3] = translation.transpose()
     # print('T_world_cam: ' + str(T_world_cam) + '\n')
     rvec, tvec = matrix_to_rtvec(T_world_cam)  # T_cam_obj
-    print('rvec:\n' + str(rvec) + '\n\n' + 'tvec:\n' + str(tvec) + '\n')
+    # print('rvec:\n' + str(rvec) + '\n\n' + 'tvec:\n' + str(tvec) + '\n')
     # ------------------------------------------------------------------------
 
     # Intrinsic Matrix -------------------------------------------------------
@@ -260,30 +268,66 @@ def main():
     intrinsic_matrix = np.float32([[alhpa,      0, 320],
                                    [    0,  alhpa, 240],
                                    [    0,      0,   1]])
-    print('Intrinsic Matrix:\n' + str(intrinsic_matrix) + '\n')
+    # print('Intrinsic Matrix:\n' + str(intrinsic_matrix) + '\n')
     # ------------------------------------------------------------------------
 
     distCoeffs = np.float32([0, 0, 0, 0])
-    print('distCoeffs:\n' + str(distCoeffs) + '\n')
+    # print('distCoeffs:\n' + str(distCoeffs) + '\n')
     # ------------------------------------------------------------------------
 
     imagePoints,_ = cv2.projectPoints(new_objs_center, rvec, tvec, intrinsic_matrix, distCoeffs)
     print('Image Points:\n' + str(imagePoints) + '\n')
 
-    for point in imagePoints:
-        if point[0,0] > 0 and point[0,1] > 0:
-            img = cv2.circle(img, (int(point[0,0]), int(point[0,1])), radius=0, color=(0, 0, 255), thickness=7)
 
-    cv2.imshow("Display window", img)
+    # ----------------------------------------------------------------------------
+    # Classification of objects in the scene
+    # ----------------------------------------------------------------------------
+    c = 60  # size of the box araound the object
+    obj_imgs = []  # list of object imgs
+    for idx, point in enumerate(imagePoints):
+
+        if point[0,0] > 0 and point[0,1] > 0:
+
+            # Draw circle in the center of the object
+            img_gui = cv2.circle(img_gui, (int(point[0,0]), int(point[0,1])), radius=0, color=(0, 0, 255), thickness=7)
+
+            # Draw BoundingBox around object
+            x1 = int(point[0,0]) - c
+            y1 = int(point[0,1]) - c
+            x2 = int(point[0,0]) + c
+            y2 = int(point[0,1]) + c
+            cv2.rectangle(img_gui,(x1,y1),(x2, y2),color=(0, 0, 255),thickness=3)
+
+            # Extract small img of the obj
+            obj_img = extractSmallImage(img_original, x1, y1, x2, y2)
+
+            # Add img to list
+            obj_imgs.append(obj_img)
+
+            # Save image of new face detected in database
+            # TODO: Eleminar img antes de guardar as novas
+            obj_img = cv2.cvtColor(obj_img, cv2.COLOR_BGR2RGB)
+            cv2.imwrite('Image_Database/obj' + str(idx) + '.png', obj_img)
+
+    # Init Classifier
+    classifier = Classifier()
+
+    classifier.classifieImages()
+    exit(0)
+
+    # ----------------------------------------------------------------------------
+    # Termination
+    # ----------------------------------------------------------------------------
+    cv2.imshow("Display window", img_gui)
+
+    # Display all objects
+    # for idx,img in enumerate(obj_imgs):
+    #     cv2.imshow("Obj" + str(idx), img)
 
     k = cv2.waitKey(0)
 
     if k == ord("s"):
         cv2.destroyAllWindows()
-
-    # ----------------------------------------------------------------------------
-    # Classification of objects in the scene
-    # ----------------------------------------------------------------------------
 
 
 if __name__ == "__main__":
