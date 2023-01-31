@@ -46,8 +46,11 @@ class Dataset(torch.utils.data.Dataset):
         # File name -> class_name_#_#_#_crop.png
         if len(parts) - 4 == 1:
             class_name = parts[0]
-        else:
+        elif len(parts) - 4 == 2:
             class_name = parts[0] + '_' + parts[1]
+        else:
+            class_name = ''
+            
         
         # use the idx of the outputs vector where the 1 should be
         if class_name == 'apple':
