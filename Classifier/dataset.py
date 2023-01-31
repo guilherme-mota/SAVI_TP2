@@ -153,6 +153,7 @@ class Dataset(torch.utils.data.Dataset):
         elif class_name == 'water_bottle':
             label = 50
         else:
-            raise ValueError('Unknown class')
+            label = -1          #in case we don't know the label
+            #raise ValueError('Unknown class')
 
         return label
