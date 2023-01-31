@@ -17,7 +17,7 @@ import torch
 import numpy as np
 from Classifier.model import Model
 from Classifier.dataset import Dataset
-
+import cv2
 
 class Classifier:
 
@@ -36,6 +36,7 @@ class Classifier:
         self.device = 'cuda:0' if torch.cuda.is_available() else 'cpu' # cuda: 0 index of gpu
 
         self.image_filenames = glob.glob('Image_Database' + '/*.png')
+        
 
         self.dataset = Dataset(self.image_filenames)
         self.loader = torch.utils.data.DataLoader(dataset=self.dataset, batch_size=len(self.dataset), shuffle=True)
@@ -65,3 +66,4 @@ class Classifier:
             # labels.append(label_t.cpu().tolist())
 
         print('Predicted Labels:\n' + str(predicted_labels) + '\n')
+        return predicted_labels
