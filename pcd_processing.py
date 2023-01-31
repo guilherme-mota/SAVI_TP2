@@ -56,7 +56,8 @@ class PointCloudProcessing():
     def downsample(self):
 
         # Pre Processing with Voxel downsampling
-        self.pcd = self.originalpcd.voxel_down_sample(voxel_size=0.01) 
+        # self.pcd = self.originalpcd.voxel_down_sample(voxel_size=0.01) 
+        self.pcd = self.originalpcd.voxel_down_sample(voxel_size=0.008) 
 
     def frameadjustment(self, distance_threshold=0.08, ransac_n=5, num_iterations=100):
         
@@ -177,9 +178,7 @@ class PointCloudProcessing():
         center = self.table_cloud.get_center()
         tx, ty, tz = center[0], center[1], center[2]
         print('tx: ' + str(tx) + ' ty: ' + str(ty) + ' tz: ' + str(tz) + '\n') 
-
         return(-tx, -ty, -tz)
-
 
     def frametransform(self, r, p , y, tx, ty, tz):
     
@@ -238,7 +237,7 @@ class PointCloudProcessing():
     def pcdclustering(self):
         
         # Clustering 
-        cluster_idx = np.array(self.outlier_cloud.cluster_dbscan(eps=0.030, min_points=60, print_progress=True))
+        cluster_idx = np.array(self.outlier_cloud.cluster_dbscan(eps=0.028, min_points=70, print_progress=True))
         
         # Clusters Index
         objects_idx = list(set(cluster_idx))
@@ -257,6 +256,7 @@ class PointCloudProcessing():
             object_point_idx = list(locate(cluster_idx, lambda X: X== object_idx))
             object_points = self.outlier_cloud.select_by_index(object_point_idx)
             object_center = object_points.get_center()
+
             # Create a dictionary to represent objects
             d = {}
             d['idx'] = str(objects_idx[object_idx])
@@ -265,7 +265,6 @@ class PointCloudProcessing():
             #d['points'].paint_uniform_color(d['color'])
             d['center'] = object_center
             #print('center of object' + str(object_idx) + ': ' + str(object_center))
-
 
             # -------------- STDeviation of each coordinate about XY and Z Axis ------------------
 
@@ -287,8 +286,6 @@ class PointCloudProcessing():
             y_width = max(y_coordinates) - min(y_coordinates)
             z_height = max(z_coordinates) - min(z_coordinates)
             
-           
-
             d['x_width'] =  x_width
             d['y_width'] = y_width
             d['height'] = z_height
@@ -313,28 +310,26 @@ class PointCloudProcessing():
             #obj_bbox.color = (d['color'])
             d['bbox'] = obj_bbox
 
-            # stdeviation_x = np.std(x_coordnites)
-            # print('desvio padrão das coord no eixo do x, obj: ' +  str(object_idx) + ' ' + str(stdeviation_x))
-            # stdeviation_y = np.std(y_coordnites)
-            # print('desvio padrão das coord no eixo do y, obj: ' +  str(object_idx) + ' ' + str(stdeviation_y))
-            # stdeviation_z = np.std(z_coordnites)
-            # print('desvio padrão das coord no eixo do z, obj: ' +  str(object_idx) + ' ' + str(stdeviation_z))
+            stdeviation_x = np.std(x_coordinates)
+            # print('desvio padrão eixo do x, obj: ' +  str(object_idx) + ' ' + str(stdeviation_x))
+            stdeviation_y = np.std(y_coordinates)
+            # print('desvio padrão eixo do y, obj: ' +  str(object_idx) + ' ' + str(stdeviation_y))
+            stdeviation_z = np.std(z_coordinates)
+            # print('desvio padrão eixo do z, obj: ' +  str(object_idx) + ' ' + str(stdeviation_z))
 
             # # print(np.asarray(object_points.points[0]))
             # # print(np.asarray(object_points.points[0][0]))
             # # print(len(np.asarray(object_points.points)))
 
+            # Object conditioning through ST Deviation
+            if stdeviation_x < 0.1 and stdeviation_y < 0.1:
+                objects.append(d)
       
-            objects.append(d)
-      
-
         # Pass value to attributes of the class
         self.objects_properties = objects
         
-
+        # Draw each object already separated
         self.objects_to_draw=[]
-
-        # to draw each object already separated
         for object in objects:
             self.objects_to_draw.append(object['points'])
             self.objects_to_draw.append(object['bbox'])

@@ -151,15 +151,12 @@ def main():
     
     # Isolation of interest part (table + objects)
     p.croppcd(-0.6, -0.6, -0.02, 0.6, 0.6, 0.4)
-
+    
     # Plane segmentation ---> Table detection and objects isolation
     p.planesegmentation()
     
     # Object Clustering
     p.pcdclustering()
-
-    # Object isolation and caracterization
-
     
     # ------------------------------------------------------------------------
     # Visualization
@@ -179,25 +176,33 @@ def main():
     # Create coordinate system
     frame = o3d.geometry.TriangleMesh().create_coordinate_frame(size=0.2, origin=np.array([0, 0, 0]))
     entities_to_draw.append(frame)
-   
+    entities_to_draw = np.concatenate((entities_to_draw, p.objects_to_draw))
 
-    # Draw objects 
-    print("")
-    print("1) Please pick at least three correspondences using [shift + left click]")
-    print("   Press [shift + right click] to undo point picking")
-    print("2) After picking points, press 'Q' to close the window")
-    vis = o3d.visualization.VisualizerWithEditing()
-    vis.create_window()
-    vis.add_geometry(p.originalpcd)
-    vis.run()  # user picks points
-    vis.destroy_window()
-    print("")
+    # Visualization of original PCD with picking points window 
+    # print("")
+    # print("1) Please pick at least three correspondences using [shift + left click]")
+    # print("   Press [shift + right click] to undo point picking")
+    # print("2) After picking points, press 'Q' to close the window")
+    # vis = o3d.visualization.VisualizerWithEditing()
+    # vis.create_window()
+    # vis.add_geometry(p.originalpcd)
+    # vis.run()  # user picks points
+    # vis.destroy_window()
+    # print("")
 
-    o3d.visualization.draw_geometries(p.objects_to_draw,
-                                             zoom = view['trajectory'][0]['zoom'],
-                                             front = view['trajectory'][0]['front'],
-                                             lookat = view['trajectory'][0]['lookat'],
-                                             up = view['trajectory'][0]['up'])
+    # Visualization of objects + frame + bbox + object bbox
+    o3d.visualization.draw_geometries(entities_to_draw,
+                                            zoom = view['trajectory'][0]['zoom'],
+                                            front = view['trajectory'][0]['front'],
+                                            lookat = view['trajectory'][0]['lookat'],
+                                            up = view['trajectory'][0]['up'])
+    
+    # Visualization of objects + object bbox
+    # o3d.visualization.draw_geometries(p.objects_to_draw,
+    #                                          zoom = view['trajectory'][0]['zoom'],
+    #                                          front = view['trajectory'][0]['front'],
+    #                                          lookat = view['trajectory'][0]['lookat'],
+    #                                          up = view['trajectory'][0]['up'])
 
 
     # ----------------------------------------------------------------------------
@@ -312,19 +317,9 @@ def main():
     num_of_objects = len(p.objects_to_draw)
     print('Number of detected objects = ' + str(num_of_objects) + '     ')
     
-    # Draw table plane + frame + objects
-    entities_to_draw = np.concatenate((entities_to_draw, p.objects_to_draw))
-
-    #o3d.visualization.draw_geometries(entities_to_draw,
-    #                                         zoom = view['trajectory'][0]['zoom'],
-    #                                         front = view['trajectory'][0]['front'],
-    #                                         lookat = view['trajectory'][0]['lookat'],
-    #                                         up = view['trajectory'][0]['up'])
-
-    # Visualization throuh Application 
+    # Visualization throuh Application (objects + objects bboxes + labels)
     app = gui.Application.instance
     app.initialize()
-
     w = app.create_window("Detected Objects", 1020, 800)
     widget3d = gui.SceneWidget()
     widget3d.scene = rendering.Open3DScene(w.renderer)
