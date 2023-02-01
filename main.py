@@ -116,7 +116,7 @@ def main():
     # ------------------------------------------------------------------------
 
     # Pre Processing with Voxel downsampling to increase process velocity
-    p.downsample()
+    p.downsample()  # 0.01
 
     # Calculation of the reference transformation parameters for the center of the table - In this case only for TRANS
     tx, ty, tz = p.frameadjustment()        

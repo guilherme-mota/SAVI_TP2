@@ -1,9 +1,13 @@
+#!/usr/bin/env python3
+
+
 # -------------------------------------------------------------------------------
 # Name:        pcd_processing
 # Purpose:     features for AI system to detect and track objects
 # Authors:     Guilherme Mota | Miguel Cruz | Luís Ascenção
 # Created:     29/12/2022
 # -------------------------------------------------------------------------------
+
 
 # ------------------------------------
 # Imports
@@ -17,6 +21,7 @@ from matplotlib import cm
 import math
 import copy
 import os
+
 
 # ------------------------------------
 # View
@@ -45,21 +50,41 @@ view = {
 class PointCloudProcessing():
 
     def __init__ (self):
+        """
+        Initialize the objecte attributes
+        """
         pass
 
+
     def loadpcd (self, filepath):
+        """
+        Loads a point cloud from a given path
+        :param filepath: directory of the point cloud data
+        """
 
         # Load PCD
         self.originalpcd = o3d.io.read_point_cloud(filepath)
-        self.pcd = self.originalpcd
+        self.pcd = self.originalpcd  # coppy pcd
 
-    def downsample(self):
+
+    def downsample(self, size=0.008):
+        """
+        Reduces the number of points in the point cloud
+        :param size: minimum distance between points (default value = 0.008)
+        """
 
         # Pre Processing with Voxel downsampling
-        # self.pcd = self.originalpcd.voxel_down_sample(voxel_size=0.01) 
-        self.pcd = self.originalpcd.voxel_down_sample(voxel_size=0.008) 
+        self.pcd = self.originalpcd.voxel_down_sample(voxel_size=size)
+
 
     def frameadjustment(self, distance_threshold=0.08, ransac_n=5, num_iterations=100):
+        """
+        Finds and adjust the table frame in relation to the world
+        :param distance_threshold: maximum distance from a ponit to the plane detected (default value = 0.008)
+        :param ransac_n: number of iterations of the ransac (default value = 5)
+        :param num_iterations: number of iterations (default value = 100)
+        :returns: translation values (tx, ty ans tz)
+        """
         
         frame = o3d.geometry.TriangleMesh().create_coordinate_frame(size=1, origin=np.array([0, 0, 0]))
 
@@ -177,10 +202,21 @@ class PointCloudProcessing():
         
         center = self.table_cloud.get_center()
         tx, ty, tz = center[0], center[1], center[2]
-        print('tx: ' + str(tx) + ' ty: ' + str(ty) + ' tz: ' + str(tz) + '\n') 
+        print('tx: ' + str(tx) + ' ty: ' + str(ty) + ' tz: ' + str(tz) + '\n')
+
         return(-tx, -ty, -tz)
 
+
     def frametransform(self, r, p , y, tx, ty, tz):
+        """
+        Aplies a transformation to the points in relation to the world reference
+        :param r: rotation on the x axis (value in degrees)
+        :param p: rotation on the y axis (value in degrees)
+        :param y: rotation on the z axis (value in degrees)
+        :param tx: translation in the x axis (value in meters)
+        :param ty: translation in the y axis (value in meters)
+        :param tz: translation in the z axis (value in meters)
+        """
     
         # Rad to Deg
         r = math.pi * r/180.0
@@ -196,6 +232,15 @@ class PointCloudProcessing():
 
         
     def croppcd(self, x_min, y_min, z_min, x_max, y_max, z_max):
+        """
+        Crop the interest zone, from the rest of the point cloud
+        :param x_min: minimum value on the x axis (value in meters)
+        :param y_min: minimum value on the y axis (value in meters)
+        :param z_min: minimum value on the z axis (value in meters)
+        :param x_max: maximum value on the x axis (value in meters)
+        :param y_max: maximum value on the y axis (value in meters)
+        :param z_max: maximum value on the z axis (value in meters)
+        """
         
         # BBOX 
         np_points = np.ndarray((8,3), dtype=float)
@@ -218,6 +263,12 @@ class PointCloudProcessing():
 
         
     def planesegmentation(self, distance_threshold=0.01, ransac_n=3, num_iterations=100):
+        """
+        Finds the table plane inside the region of interest
+        :param distance_threshold: maximum distance from a ponit to the plane detected (default value = 0.01)
+        :param ransac_n: number of iterations of the ransac (default value = 3)
+        :param num_iterations: number of iterations (default value = 100)
+        """
         
         plane_model, inliers = self.pcd.segment_plane(distance_threshold,ransac_n, num_iterations)
         #plane_model, inliers = self.table_cloud.segment_plane(distance_threshold,ransac_n, num_iterations)
@@ -235,6 +286,9 @@ class PointCloudProcessing():
         
 
     def pcdclustering(self):
+        """
+        Detects and isolates objects on the table plane
+        """
         
         # Clustering 
         cluster_idx = np.array(self.outlier_cloud.cluster_dbscan(eps=0.028, min_points=70, print_progress=True))
@@ -333,8 +387,3 @@ class PointCloudProcessing():
         for object in objects:
             self.objects_to_draw.append(object['points'])
             self.objects_to_draw.append(object['bbox'])
-
-        
-              
-       
-            

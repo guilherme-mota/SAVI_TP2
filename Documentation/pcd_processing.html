@@ -53,21 +53,42 @@
     
 <tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="PointCloudProcessing-__init__"><strong>__init__</strong></a>(self)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+<dl><dt><a name="PointCloudProcessing-__init__"><strong>__init__</strong></a>(self)</dt><dd><tt>Initialize&nbsp;the&nbsp;objecte&nbsp;attributes</tt></dd></dl>
 
-<dl><dt><a name="PointCloudProcessing-croppcd"><strong>croppcd</strong></a>(self, x_min, y_min, z_min, x_max, y_max, z_max)</dt></dl>
+<dl><dt><a name="PointCloudProcessing-croppcd"><strong>croppcd</strong></a>(self, x_min, y_min, z_min, x_max, y_max, z_max)</dt><dd><tt>Crop&nbsp;the&nbsp;interest&nbsp;zone,&nbsp;from&nbsp;the&nbsp;rest&nbsp;of&nbsp;the&nbsp;point&nbsp;cloud<br>
+:param&nbsp;x_min:&nbsp;minimum&nbsp;value&nbsp;on&nbsp;the&nbsp;x&nbsp;axis&nbsp;(value&nbsp;in&nbsp;meters)<br>
+:param&nbsp;y_min:&nbsp;minimum&nbsp;value&nbsp;on&nbsp;the&nbsp;y&nbsp;axis&nbsp;(value&nbsp;in&nbsp;meters)<br>
+:param&nbsp;z_min:&nbsp;minimum&nbsp;value&nbsp;on&nbsp;the&nbsp;z&nbsp;axis&nbsp;(value&nbsp;in&nbsp;meters)<br>
+:param&nbsp;x_max:&nbsp;maximum&nbsp;value&nbsp;on&nbsp;the&nbsp;x&nbsp;axis&nbsp;(value&nbsp;in&nbsp;meters)<br>
+:param&nbsp;y_max:&nbsp;maximum&nbsp;value&nbsp;on&nbsp;the&nbsp;y&nbsp;axis&nbsp;(value&nbsp;in&nbsp;meters)<br>
+:param&nbsp;z_max:&nbsp;maximum&nbsp;value&nbsp;on&nbsp;the&nbsp;z&nbsp;axis&nbsp;(value&nbsp;in&nbsp;meters)</tt></dd></dl>
 
-<dl><dt><a name="PointCloudProcessing-downsample"><strong>downsample</strong></a>(self)</dt></dl>
+<dl><dt><a name="PointCloudProcessing-downsample"><strong>downsample</strong></a>(self, size=0.008)</dt><dd><tt>Reduces&nbsp;the&nbsp;number&nbsp;of&nbsp;points&nbsp;in&nbsp;the&nbsp;point&nbsp;cloud<br>
+:param&nbsp;size:&nbsp;minimum&nbsp;distance&nbsp;between&nbsp;points&nbsp;(default&nbsp;value&nbsp;=&nbsp;0.008)</tt></dd></dl>
 
-<dl><dt><a name="PointCloudProcessing-frameadjustment"><strong>frameadjustment</strong></a>(self, distance_threshold=0.08, ransac_n=5, num_iterations=100)</dt></dl>
+<dl><dt><a name="PointCloudProcessing-frameadjustment"><strong>frameadjustment</strong></a>(self, distance_threshold=0.08, ransac_n=5, num_iterations=100)</dt><dd><tt>Finds&nbsp;and&nbsp;adjust&nbsp;the&nbsp;table&nbsp;frame&nbsp;in&nbsp;relation&nbsp;to&nbsp;the&nbsp;world<br>
+:param&nbsp;distance_threshold:&nbsp;maximum&nbsp;distance&nbsp;from&nbsp;a&nbsp;ponit&nbsp;to&nbsp;the&nbsp;plane&nbsp;detected&nbsp;(default&nbsp;value&nbsp;=&nbsp;0.008)<br>
+:param&nbsp;ransac_n:&nbsp;number&nbsp;of&nbsp;iterations&nbsp;of&nbsp;the&nbsp;ransac&nbsp;(default&nbsp;value&nbsp;=&nbsp;5)<br>
+:param&nbsp;num_iterations:&nbsp;number&nbsp;of&nbsp;iterations&nbsp;(default&nbsp;value&nbsp;=&nbsp;100)<br>
+:returns:&nbsp;translation&nbsp;values&nbsp;(tx,&nbsp;ty&nbsp;ans&nbsp;tz)</tt></dd></dl>
 
-<dl><dt><a name="PointCloudProcessing-frametransform"><strong>frametransform</strong></a>(self, r, p, y, tx, ty, tz)</dt></dl>
+<dl><dt><a name="PointCloudProcessing-frametransform"><strong>frametransform</strong></a>(self, r, p, y, tx, ty, tz)</dt><dd><tt>Aplies&nbsp;a&nbsp;transformation&nbsp;to&nbsp;the&nbsp;points&nbsp;in&nbsp;relation&nbsp;to&nbsp;the&nbsp;world&nbsp;reference<br>
+:param&nbsp;r:&nbsp;rotation&nbsp;on&nbsp;the&nbsp;x&nbsp;axis&nbsp;(value&nbsp;in&nbsp;degrees)<br>
+:param&nbsp;p:&nbsp;rotation&nbsp;on&nbsp;the&nbsp;y&nbsp;axis&nbsp;(value&nbsp;in&nbsp;degrees)<br>
+:param&nbsp;y:&nbsp;rotation&nbsp;on&nbsp;the&nbsp;z&nbsp;axis&nbsp;(value&nbsp;in&nbsp;degrees)<br>
+:param&nbsp;tx:&nbsp;translation&nbsp;in&nbsp;the&nbsp;x&nbsp;axis&nbsp;(value&nbsp;in&nbsp;meters)<br>
+:param&nbsp;ty:&nbsp;translation&nbsp;in&nbsp;the&nbsp;y&nbsp;axis&nbsp;(value&nbsp;in&nbsp;meters)<br>
+:param&nbsp;tz:&nbsp;translation&nbsp;in&nbsp;the&nbsp;z&nbsp;axis&nbsp;(value&nbsp;in&nbsp;meters)</tt></dd></dl>
 
-<dl><dt><a name="PointCloudProcessing-loadpcd"><strong>loadpcd</strong></a>(self, filepath)</dt></dl>
+<dl><dt><a name="PointCloudProcessing-loadpcd"><strong>loadpcd</strong></a>(self, filepath)</dt><dd><tt>Loads&nbsp;a&nbsp;point&nbsp;cloud&nbsp;from&nbsp;a&nbsp;given&nbsp;path<br>
+:param&nbsp;filepath:&nbsp;directory&nbsp;of&nbsp;the&nbsp;point&nbsp;cloud&nbsp;data</tt></dd></dl>
 
-<dl><dt><a name="PointCloudProcessing-pcdclustering"><strong>pcdclustering</strong></a>(self)</dt></dl>
+<dl><dt><a name="PointCloudProcessing-pcdclustering"><strong>pcdclustering</strong></a>(self)</dt><dd><tt>Detects&nbsp;and&nbsp;isolates&nbsp;objects&nbsp;on&nbsp;the&nbsp;table&nbsp;plane</tt></dd></dl>
 
-<dl><dt><a name="PointCloudProcessing-planesegmentation"><strong>planesegmentation</strong></a>(self, distance_threshold=0.01, ransac_n=3, num_iterations=100)</dt></dl>
+<dl><dt><a name="PointCloudProcessing-planesegmentation"><strong>planesegmentation</strong></a>(self, distance_threshold=0.01, ransac_n=3, num_iterations=100)</dt><dd><tt>Finds&nbsp;the&nbsp;table&nbsp;plane&nbsp;inside&nbsp;the&nbsp;region&nbsp;of&nbsp;interest<br>
+:param&nbsp;distance_threshold:&nbsp;maximum&nbsp;distance&nbsp;from&nbsp;a&nbsp;ponit&nbsp;to&nbsp;the&nbsp;plane&nbsp;detected&nbsp;(default&nbsp;value&nbsp;=&nbsp;0.01)<br>
+:param&nbsp;ransac_n:&nbsp;number&nbsp;of&nbsp;iterations&nbsp;of&nbsp;the&nbsp;ransac&nbsp;(default&nbsp;value&nbsp;=&nbsp;3)<br>
+:param&nbsp;num_iterations:&nbsp;number&nbsp;of&nbsp;iterations&nbsp;(default&nbsp;value&nbsp;=&nbsp;100)</tt></dd></dl>
 
 <hr>
 Data descriptors defined here:<br>
