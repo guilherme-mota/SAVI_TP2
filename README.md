@@ -1,62 +1,51 @@
-Trabalho Prático 2 - SAVI
+Trabalho Prático 2 - SAVI 2022-2023
 ==============
-Miguel Riem Oliveira <mriem@ua.pt>
-2022-2023
 
-# Sumário
+# Project Introduction
 
-O trabalho **SAVI - Where's my coffee mug?** consiste na implementação de um sistema de perceção avançada que processe informação recolhida de sensores 3D e também de câmaras convencionais.
-O objetivo é detetar os objetos na cena e as suas propriedades.
+Project developed within the scope of the curricular unit, Advanced Industrial Vision Systems, at the University of Aveiro.
 
-# Dados
+Consists of a program that processes information collected by 3D sensors and conventional cameras, in order to detect and classify objects.
 
-Os dados a utilizar são do [Washington RGB-D Dataset](http://rgbd-dataset.cs.washington.edu/dataset/). Há dois datasets distintos: 
+For that it was used point cloud processing tools ([Open3D](http://www.open3d.org/)) and neural networks ([Pytorch](https://pytorch.org/)).
 
-### [RGB-D Object Dataset](http://rgbd-dataset.cs.washington.edu/dataset/)
 
-Contém 300 objetos agrupados em 51 categorias. 
+## Dataset
 
-![Image](docs/rgbd_dataset2.png)
+The data used in this project is from [Washington RGB-D Dataset](http://rgbd-dataset.cs.washington.edu/dataset/).
 
-Tem vários tipos de dados que podem ser utilizados de forma diferente. Neste dataset os objetos são visualizados isoladamente e é fornecida informação de ground truth (os labels) sobre a localização dos objetos nas imagens RGB, Depth e na point cloud. É também disponibilizada a pose dos objetos.
+## Requirements
+To run the program, the following packages must be installed:
+* open3d
+* pytorch
+* numpy
+* pyttsx3
+* opencv-python
+* colorama
+* matplotlib
+* tqdm
+* glob
 
-![Image](docs/rgbd.png)
+## Execution
+When running the program from the terminal, use the following notation:
+```
+./main.py -s
+```
 
-### [RGB-D Scenes Dataset](http://rgbd-dataset.cs.washington.edu/dataset/rgbd-scenes-v2/)
+After the -s, put the value of the scene you intend to analyze.
+If you don't put anything, by default the program opens the scene 1, from the point cloud scene01.ply.
 
-Este dataset contém 14 cenas com mobília (sofás e mesas) e um subgrupo dos objetos presentes do RGB-D Object Dataset (bowls, caps, cereal boxes, coffee mugs, and soda cans). 
-Este dataset contém anotações dos objetos na cena.
+Example to open scene 10:
+```
+./main.py -s 10
+```
 
-![Image](docs/rgbd_scenes_v2.png)
+## Contact
+Guilherme Mota - <motaguilherme99@ua.pt>
 
-# Objetivos
+Miguel Cruz - <miguelcruz51@ua.pt>
 
-A avaliação será feita na apresentação do trabalho pelos alunos. Serão avaliadas várias vertentes do trabalho como descrito em baixo. 
+Luís Ascensão - <luispiresascensao@ua.pt>
 
-### Objetivo 1 - Treino de um classificador em deep learning
-
-Pretende-se que o sistema desenvolvido seja capaz de detetar objetos na cena (em dados do RGB-D Scenes Dataset) e depois calcule várias propriedades dos objetos.
-
-O RGB-D Object Dataset deve ser explorado e os seus dados utilizados para desenvolver uma rede de deep learning que consiga efetuar a classificação dos objetos.
-Deve-se proceder à divisão do dataset em treino e teste (80% / 20%). Depois de treinada, deve ser possível calcular a precisão global e por classe.
-
-### Objetivo 2 - Pre-processamento 3D
-
-A ideia é desenvolver um sistema que processe a nuvem de pontos de uma cena (dados do RGB-D Scenes Dataset) e consiga isolar os objetos na nuvem de pontos. O sistema deve calcular várias propriedades dos objetos como:
-
-- a cor,
-- a altura,
-- a largura,
-- outros relevantes.
-
-### Objetivo 3 - Classificação de objetos na cena
-
-A segmentação de objetos nas nuvens de pontos que foi efetuada anteriormente pode ser utilizada para descobrir a zona onde está o objeto na imagem RGB. Daqui pode-se extrair uma sub-imagem que contenha apenas o objeto e dá-la à rede de classificação anteriormente desenvolvida.
-
-### Objetivo 4 - Descrição áudio da cena
-
-A ideia é utilizar um sintetizador de discurso para que o sistema consiga descrever verbalmente a cena que lhe é mostrada, dizendo por exemplo: "A cena contém duas canecas, uma branca e outra azul, e uma caixa de cereais vermelha com altura de 15 centímetros."
-
-### Objetivo 5 - Sistema em tempo real
-
-Utilizando uma câmara RGB-D em frente a uma mesa, experimente o sistema a correr em tempo real.
+## Acknowledgments
+Professor Miguel Oliveira - <mriem@ua.pt>
