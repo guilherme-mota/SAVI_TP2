@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 
 
+# -------------------------------------------------------------------------------
+# Name:        train
+# Purpose:     Trains the classifier
+# Authors:     Guilherme Mota | Miguel Cruz | Luís Ascenção
+# Created:     29/12/2022
+# -------------------------------------------------------------------------------
+
+
 #-----------------
 # Imports
 #-----------------
@@ -41,12 +49,10 @@ def main():
     dataset_path = '/home/guilherme/SAVI_Datasets/rgbd-dataset/train'
     image_filenames = glob.glob(dataset_path + '/*.png')
 
-    # Sample only a few images to speed up development
-    # image_filenames = random.sample(image_filenames, k=400)
-
     # Create the dataset
     dataset_train = Dataset(image_filenames)
     loader_train = torch.utils.data.DataLoader(dataset=dataset_train, batch_size=648, shuffle=True)
+
 
     # -----------------------------------------------------------------
     # Training

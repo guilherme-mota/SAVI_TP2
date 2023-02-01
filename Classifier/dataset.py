@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 
 
+# -------------------------------------------------------------------------------
+# Name:        dataset
+# Purpose:     Dataset model for classifying 51 objects
+# Authors:     Guilherme Mota | Miguel Cruz | Luís Ascenção
+# Created:     29/12/2022
+# -------------------------------------------------------------------------------
+
+
 #-----------------
 # Imports
 #-----------------
@@ -12,32 +20,57 @@ from torchvision import transforms
 class Dataset(torch.utils.data.Dataset):
 
     def __init__(self, image_filenames):
+        """
+        Initialize the objecte attributes
+        :param image_filenames: image directory list
+        """
 
+        # Init base class
         super().__init__()
 
+        # Initialize Attributes
         self.image_filenames = image_filenames
         self.num_images = len(self.image_filenames)
         self.labels = []
 
+        # fill list with image labels
         for image_filename in self.image_filenames:
             self.labels.append(self.getClassFromFilename(image_filename))
         
         # Create a set of transformations
         self.transforms = transforms.Compose([transforms.Resize((224,224)),transforms.ToTensor()])
 
-    def __getitem__(self, index):  # return a specific element x,y given the index, of the dataset
+
+    def __getitem__(self, index):
+        """
+        Given a specific index, returns the image transformed and the corresponding label
+        :param index: index of the image
+        :return: image transformed and it's label
+        """
 
         # Load the image
         image_pil = Image.open(self.image_filenames[index])
 
+        # Transform image to tensor
         image_t = self.transforms(image_pil)
 
         return image_t, self.labels[index]
 
-    def __len__(self):  # return the length of the dataset
+
+    def __len__(self):
+        """
+        Returns the length of the dataset
+        :return: number of images in the dataset
+        """
         return self.num_images
 
+
     def getClassFromFilename(self, filename):
+        """
+        Given a given filename, returns the corresponding label
+        :param filename: name of the image file
+        :return: image label, from 0 to 50; in case of non-match, returns -1
+        """
 
         parts = filename.split('/')
         part = parts[-1]
@@ -50,7 +83,6 @@ class Dataset(torch.utils.data.Dataset):
             class_name = parts[0] + '_' + parts[1]
         else:
             class_name = ''
-            
         
         # use the idx of the outputs vector where the 1 should be
         if class_name == 'apple':

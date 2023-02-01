@@ -1,14 +1,39 @@
+#!/usr/bin/env python3
+
+
+# -------------------------------------------------------------------------------
+# Name:        classifier
+# Purpose:     Classifies the diferent object detected
+# Authors:     Guilherme Mota | Miguel Cruz | Luís Ascenção
+# Created:     29/12/2022
+# -------------------------------------------------------------------------------
+
+
+#-----------------
+# Imports
+#-----------------
 import numpy as np
+
 
 # Information about the diferent scenes
 class  Scenes:
 
     def __init__(self, scene):
+        """
+        Initialize the objecte attributes
+        """
 
+        # Initialize Attributes
         self.information = self.getSceneInfo(scene)
 
 
     def getSceneInfo(self, scene):
+        """
+        For a given scene, returns the corresponding information
+        :param scene: number of the scene, from 1 to 14
+        :return: dictionary with the following information: point cloud directory; rgb image directory;
+        numpy array with the rotation, in uqaternions, in relacion to the world; numpy array with the translation in relation ti the world
+        """
 
         if scene == 1: 
             dic =  {'pcd':'docs/rgbd-scenes-v2_pc/rgbd-scenes-v2/pc/01.pcd',

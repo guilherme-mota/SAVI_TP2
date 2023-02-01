@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 
 
+# -------------------------------------------------------------------------------
+# Name:        classification_visualizer
+# Purpose:     Draws the diferent images that are being classified with the 
+#              corresponding label
+# Authors:     Guilherme Mota | Miguel Cruz | Luís Ascenção
+# Created:     29/12/2022
+# -------------------------------------------------------------------------------
+
+
 #-----------------
 # Imports
 #-----------------
@@ -14,13 +23,24 @@ from torchvision import transforms
 class ClassificationVisualizer():
 
     def __init__(self, title):
+        """
+        Initialize the objecte attributes
+        :param title: title of the figure
+        """
         
-        # Initial Parameters
-        self.handles = {} # dictionary of handles per layer
-        self.title = title
+        # Initialize Attributes
+        self.handles = {}  # dictionary of handles per layer
+        self.title = title  # figure title
         self.tensor_to_PIL_image = transforms.ToPILImage()
 
+
     def draw(self, inputs, labels, outputs):
+        """
+        Draws a figure with a grid composed of a random sample of 25 images
+        :param inputs: batch of images tested
+        :param labels: list of labels from the images tested
+        :param outputs: predicted labels for the images tested
+        """
 
         # Setup figure
         self.figure = plt.figure(self.title)
@@ -75,8 +95,14 @@ class ClassificationVisualizer():
         if not plt.fignum_exists(1):
             print('Terminating')
             exit(0)
+            
 
     def getTitle(self, label):
+        """
+        Receives the label of an image and returns its title
+        :param label: label of the image
+        :return: title of the image
+        """
         
         if label == 0:
             title = 'apple'

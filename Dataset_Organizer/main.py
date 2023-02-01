@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 
 
+# -------------------------------------------------------------------------------
+# Name:        main
+# Purpose:     Perform simple operations, test code and ideas
+# Authors:     Guilherme Mota | Miguel Cruz | Luís Ascenção
+# Created:     29/12/2022
+# -------------------------------------------------------------------------------
+
+
 # -------
 # Imports
 # -------
@@ -111,9 +119,9 @@ def main():
     # imgs[0] -> /home/guilherme/SAVI_Datasets/rgbd-dataset/apple_1_1_100_crop.png
 
 
-    # ---------------------------
+    # --------------------------------------------------------------------------------------
     # Create txt file with code 2
-    # ---------------------------
+    # --------------------------------------------------------------------------------------
     # file = open("python_code2.txt", "w")
     # # Insert text in file
     # for idx,c_name in enumerate(class_names):
@@ -125,9 +133,9 @@ def main():
     # file.close()
 
 
-    # ------------------------------------------------
+    # --------------------------------------------------------------------------------------
     # Divisão do dataset em treino e teste (80% / 20%)
-    # ------------------------------------------------
+    # --------------------------------------------------------------------------------------
     # train_imgs = random.sample(imgs, k=165711)  # Sample random training images 
     # print(str(len(train_imgs)) + ' train imagens\n')
     # print(train_imgs[0] + '\n')
@@ -151,9 +159,10 @@ def main():
     # for img in folders:
     #     print(img + '\n')
 
-    # ---------------------------
+
+    # --------------------------------------------------------------------------------------
     # Create txt file with code 1
-    # ---------------------------
+    # --------------------------------------------------------------------------------------
     # file = open("python_code.txt", "w")
     # # Insert text in file
     # for idx,folder in enumerate(folders):
@@ -165,9 +174,9 @@ def main():
     # file.close()
 
 
-    # ------------------------
+    # --------------------------------------------------------------------------------------
     # Delete unnecessary files
-    # ------------------------
+    # --------------------------------------------------------------------------------------
     # for folder in folders:
     #     # New directory inside class folder
     #     folders2 = os.listdir(directory + '/' + folder)
@@ -182,9 +191,9 @@ def main():
     #             os.remove(file)
 
 
-    # -------------------------------------------
+    # --------------------------------------------------------------------------------------
     # Cut all images to the same folder/directory
-    # -------------------------------------------
+    # --------------------------------------------------------------------------------------
     # for folder in folders:
     #     # New directory inside class folder
     #     directory2 = directory + '/' + folder

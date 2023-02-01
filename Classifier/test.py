@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+# -------------------------------------------------------------------------------
+# Name:        test
+# Purpose:     Tests the classifier
+# Authors:     Guilherme Mota | Miguel Cruz | Luís Ascenção
+# Created:     29/12/2022
+# -------------------------------------------------------------------------------
+
 
 #-----------------
 # Imports
@@ -56,8 +63,9 @@ def main():
 
     # Move the model variable to the gpu if one exists
     model.to(device)
+    
 
-    # Run test in batches ---------------------------------------
+    # Run test in batches -----------------------------------------------------------------------------------------------
     test_losses = []
     labels = []
     predicted_labels = []
@@ -84,19 +92,24 @@ def main():
 
         # Update Index
         idx = batch_idx + 1
+    # ----------------------------------------------------------------------------------------------------------------
+
+    
+    # Terminal Prints -----------------------------------------------------------------------
     print(test_losses)
     labels = [item for sublist in labels for item in sublist]
     total_matrix_of_confusion = confusion_matrix(labels, predicted_labels)
     print(classification_report(labels, predicted_labels))
     print("Number of Labels: ",len(labels),"Number of Predicted Labels: ",len(predicted_labels))
+
+
+    # Visualization -----------------------------------------------------------------------
     df_cm = pd.DataFrame(total_matrix_of_confusion)
     plt.figure()
     sn.set(font_scale=0.7) # for label size
     sn.heatmap(df_cm, annot=True)
     plt.show()
 
-
-    # --------------------------------------------------------
 
 if __name__ == "__main__":
     main()

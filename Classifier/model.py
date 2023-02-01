@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 
 
+# -------------------------------------------------------------------------------
+# Name:        model
+# Purpose:     Model of classifier (neural network)
+# Authors:     Guilherme Mota | Miguel Cruz | Luís Ascenção
+# Created:     29/12/2022
+# -------------------------------------------------------------------------------
+
+
 #-----------------
 # Imports
 #-----------------
@@ -10,7 +18,11 @@ from torch import nn
 class Model(nn.Module):
 
     def __init__(self):
+        """
+        Initialize the objecte attributes
+        """
 
+        # Init base class
         super().__init__()
 
         # bx3x224x224 input images
@@ -42,7 +54,13 @@ class Model(nn.Module):
         self.fc2 = nn.Linear(10,51)
         self.relu = nn.ReLU()
 
+
     def forward(self,x):
+        """
+        Feeds an image to the network and returns the result
+        :param x: image as torch.tensor
+        return: probability for each label
+        """
         
         out = self.layer1(x)
         out = self.layer2(out)
