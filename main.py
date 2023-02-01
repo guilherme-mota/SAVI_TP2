@@ -14,6 +14,7 @@
 # ------------------------------------
 import glob
 import os
+import pyttsx3
 import cv2
 import copy
 import torch
@@ -63,6 +64,22 @@ def matrix_to_rtvec(matrix):
 def extractSmallImage(image_full, x1, y1, x2, y2):
     return image_full[y1:y2, x1:x2]
 
+def stringConstruct(old_dict, new_dict):
+    if(old_dict==new_dict):
+        return "There are no changes to the scenario"
+    else:
+        new_string = "There are "
+        for key in new_dict:
+            if (new_dict[key][1] == 1):
+                #print(new_dic[key])
+                new_string = new_string + str(new_dict[key][1]) + " " + str(new_dict[key][0]).replace("_"," ") + ", "
+            elif (new_dict[key][1] != 0):
+                new_string = new_string + str(new_dict[key][1]) + " " + str(new_dict[key][0]).replace("_"," ") + "s, "
+        new_string = new_string + "on the table."
+        return new_string
+
+
+
 def main():
     
     # ------------------------------------------------------------------------
@@ -73,6 +90,17 @@ def main():
     parser = argparse.ArgumentParser(description="Point Cloud Scene")
     parser.add_argument("-s", "--scene", nargs='?', const=1, type=int, help="Scene selection", default=1)
     args = vars(parser.parse_args())
+
+    preset_dictionary = {0:['apple',0],1:['ball',0],2:['banana',0],3:['bell_peper',0],4:['binder',0],5:['bowl',0],6:['calculator',0],
+    7:['camera',0],8:['cap',0],9:['cell_phone',0],10:['cereal_box',0],11:['coffee_mug',0],12:['comb',0],13:['dry_battery',0],14:['flashlight',0],15:['food_bag',0],
+    16:['food_box',0],17:['food_can',0],18:['food_cup',0],19:['food_jar',0],20:['garlic',0],21:['glue_stick',0],22:['greens',0],23:['hand_towel',0],24:['instant_noodles',0],
+    25:['keyboard',0],26:['kleenex',0],27:['lemon',0],28:['lightbulb',0],29:['lime',0],30:['marker',0],31:['mushroom',0],32:['notebook',0],33:['onion',0],
+    34:['orange',0],35:['peach',0],36:['pear',0],37:['pitcher',0],38:['plate',0],39:['pliers',0],40:['potato',0],41:['rubber_eraser',0],42:['scissors',0],
+    43:['shampoo',0],44:['soda_can',0],45:['sponge',0],46:['stapler',0],47:['tomato',0],48:['toothbrush',0],49:['toothpaste',0],50:['water_bottle',0]}
+
+    old_dict = preset_dictionary.copy()
+    new_dict = old_dict.copy()
+    engine = pyttsx3.init()
     
     # Init Scene
     scene = Scenes(args['scene'])
@@ -95,7 +123,8 @@ def main():
   
     # Frame Transform CAM to TABLE
     p.frametransform(0, 0, 0, tx, ty, tz)
-    p.frametransform(-108, 0, 0, 0, 0, 0)
+    # p.frametransform(-108, 0, 0, 0, 0, 0)
+    p.frametransform(-112, 0, 0, 0, 0, 0)
     p.frametransform(0, 0, -37, 0, 0, 0)
 
     # --------------------------------------------------------------------------
@@ -123,15 +152,12 @@ def main():
     
     # Isolation of interest part (table + objects)
     p.croppcd(-0.6, -0.6, -0.02, 0.6, 0.6, 0.4)
-
+    
     # Plane segmentation ---> Table detection and objects isolation
     p.planesegmentation()
     
     # Object Clustering
     p.pcdclustering()
-
-    # Object isolation and caracterization
-
     
     # ------------------------------------------------------------------------
     # Visualization
@@ -151,64 +177,33 @@ def main():
     # Create coordinate system
     frame = o3d.geometry.TriangleMesh().create_coordinate_frame(size=0.2, origin=np.array([0, 0, 0]))
     entities_to_draw.append(frame)
-   
-
-    # Draw objects 
-    num_of_objects = len(p.objects_to_draw)
-    # print('Number of detected objects = ' + str(num_of_objects) + '     ')
-    
-    # Draw table plane + frame + objects
     entities_to_draw = np.concatenate((entities_to_draw, p.objects_to_draw))
 
-    # o3d.visualization.draw_geometries(entities_to_draw,
-    #                                         zoom = view['trajectory'][0]['zoom'],
-    #                                         front = view['trajectory'][0]['front'],
-    #                                         lookat = view['trajectory'][0]['lookat'],
-    #                                         up = view['trajectory'][0]['up'])
+    # Visualization of original PCD with picking points window 
+    # print("")
+    # print("1) Please pick at least three correspondences using [shift + left click]")
+    # print("   Press [shift + right click] to undo point picking")
+    # print("2) After picking points, press 'Q' to close the window")
+    # vis = o3d.visualization.VisualizerWithEditing()
+    # vis.create_window()
+    # vis.add_geometry(p.originalpcd)
+    # vis.run()  # user picks points
+    # vis.destroy_window()
+    # print("")
 
-    print("")
-    print("1) Please pick at least three correspondences using [shift + left click]")
-    print("   Press [shift + right click] to undo point picking")
-    print("2) After picking points, press 'Q' to close the window")
-    vis = o3d.visualization.VisualizerWithEditing()
-    vis.create_window()
-    vis.add_geometry(p.originalpcd)
-    vis.run()  # user picks points
-    vis.destroy_window()
-    print("")
-
+    # Visualization of objects + frame + bbox + object bbox
+    o3d.visualization.draw_geometries(entities_to_draw,
+                                            zoom = view['trajectory'][0]['zoom'],
+                                            front = view['trajectory'][0]['front'],
+                                            lookat = view['trajectory'][0]['lookat'],
+                                            up = view['trajectory'][0]['up'])
+    
+    # Visualization of objects + object bbox
     # o3d.visualization.draw_geometries(p.objects_to_draw,
-    #                                         zoom = view['trajectory'][0]['zoom'],
-    #                                         front = view['trajectory'][0]['front'],
-    #                                         lookat = view['trajectory'][0]['lookat'],
-    #                                         up = view['trajectory'][0]['up'])
-
-    # Visualization throuh Application 
-    # app = gui.Application.instance
-    # app.initialize()
-
-    # w = app.create_window("Detected Objects", 1020, 800)
-    # widget3d = gui.SceneWidget()
-    # widget3d.scene = rendering.Open3DScene(w.renderer)
-    # widget3d.scene.set_background([1,1,1,1])
-    # material = rendering.MaterialRecord()
-    # material.shader = "defaultUnlit"
-    # material.point_size = 2 * w.scaling
-
-    # for entity_idx, entity in enumerate(p.objects_to_draw):
-    #     widget3d.scene.add_geometry("Entity" + str(entity_idx),entity, material)
-    #     for obj in p.objects_properties:
-    #         l = widget3d.add_3d_label(obj['center']+(-0.1,0,((obj['height']/2)+0.05)), 'Object: ' + str(obj['idx']))
-    #         l2 = widget3d.add_3d_label(obj['center']+(-0.1,0,((obj['height']/2)+0.08)), 'Aprox. Volume: ' + str(round(obj['x_width']*1000,0)) + 
-    #                                    ' x ' + str(round(obj['y_width']*1000,0)) + ' x ' + str(round(obj['height']*1000,0)) + 'mm' )
-
-    #         # l.color = gui.Color(p.objects_to_draw.colors[idx][0], p.objects_to_draw.colors[idx][1],
-    #         #                     p.objects_to_draw.colors[idx][2])
-    #         # l.scale = np.random.uniform(0.5, 3.0)
-    # bbox = widget3d.scene.bounding_box
-    # widget3d.setup_camera(60.0, bbox, bbox.get_center())
-    # w.add_child(widget3d)
-    # app.run()
+    #                                          zoom = view['trajectory'][0]['zoom'],
+    #                                          front = view['trajectory'][0]['front'],
+    #                                          lookat = view['trajectory'][0]['lookat'],
+    #                                          up = view['trajectory'][0]['up'])
 
 
     # ----------------------------------------------------------------------------
@@ -312,17 +307,60 @@ def main():
     # Init Classifier
     classifier = Classifier()
 
-    classifier.classifieImages()
-    exit(0)
+    predicted_labels = classifier.classifieImages()
+    #exit(0)
+    for label in predicted_labels:
+        if new_dict.get(label) is not None:
+                new_dict[label] = [new_dict[label][0],new_dict[label][1] + 1]
+        else:
+            raise ValueError('Unknow class')
+
+    num_of_objects = len(p.objects_to_draw)
+    print('Number of detected objects = ' + str(num_of_objects) + '     ')
+    
+    # Visualization throuh Application (objects + objects bboxes + labels)
+    app = gui.Application.instance
+    app.initialize()
+    w = app.create_window("Detected Objects", 1020, 800)
+    widget3d = gui.SceneWidget()
+    widget3d.scene = rendering.Open3DScene(w.renderer)
+    widget3d.scene.set_background([1,1,1,1])
+    material = rendering.MaterialRecord()
+    material.shader = "defaultUnlit"
+    material.point_size = 2 * w.scaling
+
+    for entity_idx, entity in enumerate(p.objects_to_draw):
+        widget3d.scene.add_geometry("Entity" + str(entity_idx),entity, material)
+        iterator_of_obj = 0
+        for obj in p.objects_properties:
+            name_of_object = new_dict[predicted_labels[iterator_of_obj]][0]
+            l = widget3d.add_3d_label(obj['center']+(-0.1,0,((obj['height']/2)+0.05)), 'Object: ' + name_of_object)#str(obj['idx']))
+            l2 = widget3d.add_3d_label(obj['center']+(-0.1,0,((obj['height']/2)+0.08)), 'Aprox. Volume: ' + str(round(obj['x_width']*1000,0)) + 
+                                    ' x ' + str(round(obj['y_width']*1000,0)) + ' x ' + str(round(obj['height']*1000,0)) + 'mm' )
+
+            #l.color = gui.Color(p.objects_to_draw.colors[idx][0], p.objects_to_draw.colors[idx][1],
+            #                      p.objects_to_draw.colors[idx][2])
+            #l.scale = np.random.uniform(0.5, 3.0)
+            iterator_of_obj+=1
+    bbox = widget3d.scene.bounding_box
+    widget3d.setup_camera(60.0, bbox, bbox.get_center())
+    w.add_child(widget3d)
+    app.run()
 
     # ----------------------------------------------------------------------------
     # Termination
     # ----------------------------------------------------------------------------
     cv2.imshow("Display window", img_gui)
+    
+    engine.say(stringConstruct(old_dict,new_dict))
+    engine.runAndWait()
+    old_dict = new_dict.copy()
+    new_dict = preset_dictionary.copy()
+
 
     # Display all objects
-    # for idx,img in enumerate(obj_imgs):
-    #     cv2.imshow("Obj" + str(idx), img)
+    for idx,img in enumerate(obj_imgs):
+        cv2.imshow("Obj" + str(idx), img)
 
     k = cv2.waitKey(0)
 
