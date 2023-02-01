@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module classification_visualizer</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>classification_visualizer</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/guilherme/SAVI_TP2/Classifier/classification_visualizer.py">/home/guilherme/SAVI_TP2/Classifier/classification_visualizer.py</a></font></td></tr></table>
+    <p><tt>#&nbsp;-------------------------------------------------------------------------------<br>
+#&nbsp;Name:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;classification_visualizer<br>
+#&nbsp;Purpose:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Draws&nbsp;the&nbsp;diferent&nbsp;images&nbsp;that&nbsp;are&nbsp;being&nbsp;classified&nbsp;with&nbsp;the&nbsp;<br>
+#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;corresponding&nbsp;label<br>
+#&nbsp;Authors:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Guilherme&nbsp;Mota&nbsp;|&nbsp;Miguel&nbsp;Cruz&nbsp;|&nbsp;Luís&nbsp;Ascenção<br>
+#&nbsp;Created:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;29/12/2022<br>
+#&nbsp;-------------------------------------------------------------------------------</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="torch.nn.functional.html">torch.nn.functional</a><br>
+<a href="numpy.html">numpy</a><br>
+</td><td width="25%" valign=top><a href="matplotlib.pyplot.html">matplotlib.pyplot</a><br>
+<a href="random.html">random</a><br>
+</td><td width="25%" valign=top><a href="torchvision.transforms.html">torchvision.transforms</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="classification_visualizer.html#ClassificationVisualizer">ClassificationVisualizer</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="ClassificationVisualizer">class <strong>ClassificationVisualizer</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#ClassificationVisualizer">ClassificationVisualizer</a>(title)<br>
+&nbsp;<br>
+<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="ClassificationVisualizer-__init__"><strong>__init__</strong></a>(self, title)</dt><dd><tt>Initialize&nbsp;the&nbsp;objecte&nbsp;attributes<br>
+:param&nbsp;title:&nbsp;title&nbsp;of&nbsp;the&nbsp;figure</tt></dd></dl>
+
+<dl><dt><a name="ClassificationVisualizer-draw"><strong>draw</strong></a>(self, inputs, labels, outputs)</dt><dd><tt>Draws&nbsp;a&nbsp;figure&nbsp;with&nbsp;a&nbsp;grid&nbsp;composed&nbsp;of&nbsp;a&nbsp;random&nbsp;sample&nbsp;of&nbsp;25&nbsp;images<br>
+:param&nbsp;inputs:&nbsp;batch&nbsp;of&nbsp;images&nbsp;tested<br>
+:param&nbsp;labels:&nbsp;list&nbsp;of&nbsp;labels&nbsp;from&nbsp;the&nbsp;images&nbsp;tested<br>
+:param&nbsp;outputs:&nbsp;predicted&nbsp;labels&nbsp;for&nbsp;the&nbsp;images&nbsp;tested</tt></dd></dl>
+
+<dl><dt><a name="ClassificationVisualizer-getTitle"><strong>getTitle</strong></a>(self, label)</dt><dd><tt>Receives&nbsp;the&nbsp;label&nbsp;of&nbsp;an&nbsp;image&nbsp;and&nbsp;returns&nbsp;its&nbsp;title<br>
+:param&nbsp;label:&nbsp;label&nbsp;of&nbsp;the&nbsp;image<br>
+:return:&nbsp;title&nbsp;of&nbsp;the&nbsp;image</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>
